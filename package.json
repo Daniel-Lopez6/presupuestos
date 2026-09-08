@@ -1,0 +1,12 @@
+{
+  "name": "presupuestos-ja",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Presupuestos y gastos deducibles para autónomos. Sin dependencias.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node servidor.mjs",
+    "test": "node test/prueba.mjs && node test/prueba-sync.mjs"
+  }
+}

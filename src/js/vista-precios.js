@@ -1,0 +1,250 @@
+/* =========================================================================
+   vista-precios.js — banco de precios reutilizable
+   ========================================================================= */
+(function (global) {
+  'use strict';
+
+  var U = global.U, App = global.App, UI = global.UI, Base = global.Base;
+  var busqueda = '', categoriaActiva = 'todas';
+
+  App.vistas.precios = {
+    titulo: 'Banco de precios',
+    subtitulo: function () {
+      var n = App.estado.partidas.length;
+      return n + (n === 1 ? ' partida guardada' : ' partidas guardadas');
+    },
+    acciones: function () {
+      return '<button class="btn" id="pre-importar">' + UI.ic('subida', 16) + '<span>Importar CSV</span></button>' +
+        '<button class="btn" id="pre-exportar">' + UI.ic('descarga', 16) + '<span>Exportar CSV</span></button>' +
+        '<button class="btn btn-pri" id="pre-nueva">' + UI.ic('mas', 16) + '<span>Nueva partida</span></button>';
+    },
+    render: function (cont) {
+      var todas = App.estado.partidas;
+      var categorias = {};
+      todas.forEach(function (p) { categorias[p.categoria || 'Sin categoría'] = true; });
+      var nombres = Object.keys(categorias).sort();
+
+      var lista = todas.filter(function (p) {
+        if (categoriaActiva !== 'todas' && (p.categoria || 'Sin categoría') !== categoriaActiva) return false;
+        if (!busqueda) return true;
+        return U.contiene(p.descripcion, busqueda) || U.contiene(p.codigo, busqueda) || U.contiene(p.categoria, busqueda);
+      });
+      lista.sort(function (a, b) {
+        var c = String(a.categoria || '').localeCompare(String(b.categoria || ''));
+        return c !== 0 ? c : String(a.codigo || '').localeCompare(String(b.codigo || ''));
+      });
+
+      var chips = ['todas'].concat(nombres).map(function (n) {
+        return '<button class="btn btn-s' + (categoriaActiva === n ? ' btn-pri' : '') +
+          '" data-cat="' + U.esc(n) + '">' + U.esc(n === 'todas' ? 'Todas' : n) + '</button>';
+      }).join('');
+
+      var filas = lista.map(function (p) {
+        return '<tr class="fila-click" data-par="' + p.id + '">' +
+          '<td class="apagado nowrap">' + U.esc(p.codigo || '') + '</td>' +
+          '<td>' + U.esc(p.descripcion) + '</td>' +
+          '<td class="tabla-oculta-movil">' + U.esc(p.categoria || '') + '</td>' +
+          '<td class="cen">' + U.esc(p.unidad) + '</td>' +
+          '<td class="num fuerte">' + U.eur(p.precio) + '</td>' +
+          '<td class="cen apagado tabla-oculta-movil">' + (p.usos || 0) + '</td>' +
+          '<td><div class="acciones-fila">' +
+            '<button class="btn btn-plano btn-icono" data-editar="' + p.id + '" title="Editar">' + UI.ic('lapiz', 16) + '</button>' +
+          '</div></td></tr>';
+      }).join('');
+
+      cont.innerHTML =
+        '<div class="aviso aviso-info">' + UI.ic('info', 16) +
+          '<div>Las partidas de aquí se insertan en cualquier presupuesto con dos clics. ' +
+          'Los precios son sin IVA. Ajusta los tuyos y añade los que uses a menudo: es lo que más tiempo ahorra.</div></div>' +
+        '<div class="tarjeta">' +
+          '<div class="tarjeta-cab" style="flex-wrap:wrap;gap:8px">' +
+            '<div class="flex" style="flex-wrap:wrap;gap:6px">' + chips + '</div>' +
+            '<div class="der"><div class="buscador"><span class="ic-b">' + UI.ic('lupa', 15) + '</span>' +
+              '<input type="search" id="pre-buscar" placeholder="Buscar partida" value="' + U.esc(busqueda) + '"></div></div>' +
+          '</div>' +
+          (lista.length
+            ? '<div class="tabla-caja"><table class="t"><thead><tr><th>Código</th><th>Descripción</th>' +
+              '<th class="tabla-oculta-movil">Categoría</th><th class="cen">Ud.</th><th class="der">Precio</th>' +
+              '<th class="cen tabla-oculta-movil">Usos</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>'
+            : UI.vacio('Sin partidas', 'Crea la primera o importa un CSV con tus precios.')) +
+        '</div>';
+    },
+    despues: function (cont) {
+      document.getElementById('pre-nueva').addEventListener('click', function () { formulario(null); });
+      document.getElementById('pre-exportar').addEventListener('click', exportarCSV);
+      document.getElementById('pre-importar').addEventListener('click', importarCSV);
+      var buscar = document.getElementById('pre-buscar');
+      if (buscar) buscar.addEventListener('input', U.debounce(function () {
+        busqueda = buscar.value;
+        App.refrescar();
+        var n = document.getElementById('pre-buscar');
+        if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
+      }, 220));
+      cont.querySelectorAll('[data-cat]').forEach(function (b) {
+        b.addEventListener('click', function () { categoriaActiva = b.dataset.cat; App.refrescar(); });
+      });
+      cont.querySelectorAll('[data-par]').forEach(function (f) {
+        f.addEventListener('click', function (e) {
+          if (e.target.closest('button')) return;
+          formulario(App.partida(f.dataset.par));
+        });
+      });
+      cont.querySelectorAll('[data-editar]').forEach(function (b) {
+        b.addEventListener('click', function (e) { e.stopPropagation(); formulario(App.partida(b.dataset.editar)); });
+      });
+    }
+  };
+
+  function categoriasExistentes() {
+    var s = {};
+    App.estado.partidas.forEach(function (p) { if (p.categoria) s[p.categoria] = true; });
+    return Object.keys(s).sort();
+  }
+
+  function formulario(partida) {
+    var esNueva = !partida;
+    var p = partida || { id: U.uid('par'), codigo: '', descripcion: '', unidad: 'ud', precio: 0, categoria: '', usos: 0 };
+    var caja = document.createElement('div');
+    caja.innerHTML =
+      UI.campo({ etiqueta: 'Descripción', tipo: 'textarea', nombre: 'descripcion', valor: p.descripcion, filas: 2,
+                 ayuda: 'Escríbela tal cual quieres que salga impresa en el presupuesto.' }) +
+      '<div class="fila-campos fc-3">' +
+        UI.campo({ etiqueta: 'Código', nombre: 'codigo', valor: p.codigo, placeholder: 'PI-01' }) +
+        UI.campo({ etiqueta: 'Unidad', tipo: 'select', nombre: 'unidad', valor: p.unidad, opciones: Base.UNIDADES }) +
+        UI.campo({ etiqueta: 'Precio sin IVA', tipo: 'number', nombre: 'precio', valor: p.precio, paso: '0.01', min: 0 }) +
+      '</div>' +
+      UI.campo({ etiqueta: 'Categoría', nombre: 'categoria', valor: p.categoria,
+                 attrs: ' list="lista-categorias"', ayuda: 'Sirve para agrupar y filtrar.' }) +
+      '<datalist id="lista-categorias">' +
+        categoriasExistentes().map(function (c) { return '<option value="' + U.esc(c) + '">'; }).join('') +
+      '</datalist>';
+
+    var botones = [{ texto: 'Cancelar' }];
+    if (!esNueva) {
+      botones.push({ texto: 'Eliminar', clase: 'btn-peligro izq', cierra: false, accion: function (m) {
+        UI.confirmar({ titulo: 'Eliminar partida', texto: 'Se quitará del banco de precios.', aceptar: 'Eliminar', peligro: true })
+          .then(function (si) {
+            if (!si) return;
+            App.borrar('partidas', p.id);
+            m.cerrar(); App.refrescar();
+          });
+        return false;
+      } });
+    }
+    botones.push({ texto: 'Guardar', clase: 'btn-pri', icono: 'guardar', accion: function (m) {
+      var v = UI.valores(m.cuerpo);
+      if (!v.descripcion || !v.descripcion.trim()) { UI.aviso('Falta la descripción', 'err'); return false; }
+      p.descripcion = v.descripcion.trim();
+      p.codigo = (v.codigo || '').trim();
+      p.unidad = v.unidad;
+      p.precio = U.num(v.precio);
+      p.categoria = (v.categoria || '').trim();
+      App.tocar(p);
+      if (esNueva) App.estado.partidas.push(p);
+      App.guardar();
+      App.refrescar();
+      UI.aviso(esNueva ? 'Partida creada' : 'Partida actualizada', 'ok');
+    } });
+
+    UI.modal({ titulo: esNueva ? 'Nueva partida' : 'Editar partida', cuerpo: caja, botones: botones });
+  }
+
+  function exportarCSV() {
+    var filas = [['codigo', 'descripcion', 'unidad', 'precio', 'categoria']];
+    App.estado.partidas.forEach(function (p) {
+      filas.push([p.codigo || '', p.descripcion, p.unidad, String(p.precio).replace('.', ','), p.categoria || '']);
+    });
+    var csv = filas.map(function (f) {
+      return f.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(';');
+    }).join('\r\n');
+    U.descargar('banco-de-precios.csv', '﻿' + csv, 'text/csv;charset=utf-8');
+    UI.aviso('Banco de precios exportado', 'ok');
+  }
+
+  function importarCSV() {
+    var caja = document.createElement('div');
+    caja.innerHTML =
+      '<p style="margin-top:0;font-size:13.5px;color:var(--texto-2)">Un archivo CSV con estas columnas, ' +
+      'separadas por punto y coma:<br><code>codigo;descripcion;unidad;precio;categoria</code></p>' +
+      '<input type="file" accept=".csv,text/csv" id="pre-archivo">' +
+      '<div id="pre-vista" style="margin-top:14px"></div>';
+    var pendientes = [];
+    var m = UI.modal({
+      titulo: 'Importar precios desde CSV',
+      cuerpo: caja,
+      botones: [
+        { texto: 'Cancelar' },
+        { texto: 'Importar', clase: 'btn-pri', icono: 'subida', accion: function () {
+          if (!pendientes.length) { UI.aviso('No hay nada que importar', 'err'); return false; }
+          pendientes.forEach(function (p) { App.estado.partidas.push(p); });
+          App.guardar();
+          App.refrescar();
+          UI.aviso(pendientes.length + ' partidas importadas', 'ok');
+        } }
+      ]
+    });
+    caja.querySelector('#pre-archivo').addEventListener('change', function (e) {
+      var f = e.target.files[0];
+      if (!f) return;
+      var lector = new FileReader();
+      lector.onload = function (ev) {
+        pendientes = parseaCSV(String(ev.target.result));
+        caja.querySelector('#pre-vista').innerHTML = pendientes.length
+          ? '<div class="aviso aviso-verde" style="margin:0">' + UI.ic('check', 16) +
+            '<div>Se han leído <b>' + pendientes.length + '</b> partidas. Pulsa Importar para añadirlas.</div></div>'
+          : '<div class="aviso aviso-rojo" style="margin:0">' + UI.ic('aviso', 16) +
+            '<div>No se ha reconocido ninguna fila. Revisa el separador y las columnas.</div></div>';
+      };
+      lector.readAsText(f, 'utf-8');
+    });
+    return m;
+  }
+
+  function parseaCSV(texto) {
+    var lineas = texto.replace(/^﻿/, '').split(/\r?\n/).filter(function (l) { return l.trim(); });
+    if (!lineas.length) return [];
+    var sep = (lineas[0].split(';').length >= lineas[0].split(',').length) ? ';' : ',';
+    var cabecera = trocea(lineas[0], sep).map(function (c) { return U.normaliza(c); });
+    var idx = {
+      codigo: cabecera.indexOf('codigo'),
+      descripcion: cabecera.indexOf('descripcion'),
+      unidad: cabecera.indexOf('unidad'),
+      precio: cabecera.indexOf('precio'),
+      categoria: cabecera.indexOf('categoria')
+    };
+    var desde = idx.descripcion > -1 ? 1 : 0;
+    if (idx.descripcion < 0) { idx = { codigo: 0, descripcion: 1, unidad: 2, precio: 3, categoria: 4 }; }
+    var res = [];
+    for (var i = desde; i < lineas.length; i++) {
+      var c = trocea(lineas[i], sep);
+      var d = (c[idx.descripcion] || '').trim();
+      if (!d) continue;
+      res.push({
+        id: U.uid('par'),
+        creado: new Date().toISOString(),
+        modificado: new Date().toISOString(),
+        codigo: (c[idx.codigo] || '').trim(),
+        descripcion: d,
+        unidad: (c[idx.unidad] || 'ud').trim() || 'ud',
+        precio: U.num(c[idx.precio]),
+        categoria: (c[idx.categoria] || '').trim(),
+        usos: 0
+      });
+    }
+    return res;
+  }
+
+  function trocea(linea, sep) {
+    var res = [], actual = '', comillas = false;
+    for (var i = 0; i < linea.length; i++) {
+      var ch = linea[i];
+      if (ch === '"') {
+        if (comillas && linea[i + 1] === '"') { actual += '"'; i++; }
+        else comillas = !comillas;
+      } else if (ch === sep && !comillas) { res.push(actual); actual = ''; }
+      else actual += ch;
+    }
+    res.push(actual);
+    return res;
+  }
+})(window);
