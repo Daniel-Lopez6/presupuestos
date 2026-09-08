@@ -33,7 +33,7 @@
             'Impuestos incluidos', 'verde') +
         kpi('Tasa de aceptación', m.tasaAceptacion + ' %',
             m.aceptados + ' aceptados de ' + (m.aceptados + m.rechazados) + ' respondidos') +
-        kpi('Importe medio', U.eur(m.ticketMedio), 'Base imponible de los aceptados') +
+        kpi('Importe medio', U.eur(m.ticketMedio), 'Sin IVA, de los aceptados') +
       '</div>';
 
       html += '<div class="sep"></div>';
@@ -144,7 +144,7 @@
     return '<div class="tarjeta"><div class="tarjeta-cab"><h2>' + m.trimestre + 'T ' + m.anio + '</h2>' +
       '<div class="der"><button class="btn btn-s" data-vista="fiscal">Detalle</button></div></div>' +
       '<div class="tarjeta-cuerpo">' +
-        linea('Trabajo aceptado (base)', U.eur(r.ingresos.base)) +
+        linea('Trabajo aceptado, sin IVA', U.eur(r.ingresos.base)) +
         linea('Gastos deducibles', (U.r2(r.gastos.deducible) ? '−' : '') + U.eur(r.gastos.deducible)) +
         linea('Resultado estimado', U.eur(resultado), true) +
         '<div class="linea-sep" style="margin:12px 0"></div>' +

@@ -235,27 +235,70 @@
   }
 
   // Reduce una imagen a un dataURL manejable (para logo y firma)
+  var TOPE_GUARDADO = 700 * 1024;   // lo que no conviene pasar por registro
+
+  // Prepara una imagen para guardarla dentro de la aplicación.
+  // Un SVG se conserva tal cual: es vectorial y sale nítido impreso a
+  // cualquier tamaño. El resto se reduce, y si aun así ocupa demasiado se
+  // vuelve a reducir hasta que entra, porque todo esto vive en el navegador.
   function imagenADataURL(file, maxLado, callback) {
+    if (!file) return callback(new Error('No hay archivo'));
+    if (file.size > 8 * 1024 * 1024) {
+      return callback(new Error('La imagen pesa más de 8 MB. Prueba con una más pequeña.'));
+    }
+
+    var esSVG = /svg/i.test(file.type) || /\.svg$/i.test(file.name || '');
     var lector = new FileReader();
+
+    lector.onerror = function () { callback(new Error('No se pudo abrir el archivo')); };
+
+    if (esSVG) {
+      lector.onload = function (e) {
+        var texto = String(e.target.result);
+        if (!/<svg[\s>]/i.test(texto)) return callback(new Error('Ese archivo no sirve como logotipo'));
+        // El SVG se pinta dentro de una <img>, que no ejecuta scripts, pero
+        // se limpia igualmente lo que no pinta nada.
+        texto = texto
+          .replace(/<script[\s\S]*?<\/script>/gi, '')
+          .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*')/gi, '');
+        var codificado;
+        try { codificado = btoa(unescape(encodeURIComponent(texto))); }
+        catch (err) { return callback(new Error('No se pudo leer el SVG')); }
+        callback(null, 'data:image/svg+xml;base64,' + codificado);
+      };
+      return lector.readAsText(file, 'utf-8');
+    }
+
     lector.onload = function (e) {
       var img = new Image();
       img.onload = function () {
-        var w = img.width, h = img.height;
-        var escala = Math.min(1, maxLado / Math.max(w, h));
-        var cw = Math.max(1, Math.round(w * escala));
-        var ch = Math.max(1, Math.round(h * escala));
-        var c = document.createElement('canvas');
-        c.width = cw; c.height = ch;
-        var ctx = c.getContext('2d');
-        ctx.drawImage(img, 0, 0, cw, ch);
-        var tipo = /png|svg/i.test(file.type) ? 'image/png' : 'image/jpeg';
-        callback(null, c.toDataURL(tipo, 0.92));
+        var lado = maxLado;
+        var salida = null;
+        // Como mucho tres intentos: original, y dos reducciones
+        for (var i = 0; i < 3; i++) {
+          salida = redibuja(img, lado, file.type);
+          if (salida.length <= TOPE_GUARDADO) break;
+          lado = Math.round(lado * 0.65);
+        }
+        callback(null, salida);
       };
       img.onerror = function () { callback(new Error('No se pudo leer la imagen')); };
       img.src = e.target.result;
     };
-    lector.onerror = function () { callback(new Error('No se pudo abrir el archivo')); };
     lector.readAsDataURL(file);
+  }
+
+  function redibuja(img, maxLado, tipoArchivo) {
+    var w = img.naturalWidth || img.width || 1;
+    var h = img.naturalHeight || img.height || 1;
+    var escala = Math.min(1, maxLado / Math.max(w, h));
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * escala));
+    c.height = Math.max(1, Math.round(h * escala));
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    // PNG para conservar la transparencia de un logotipo; JPEG para fotos
+    var tipo = /jpe?g/i.test(tipoArchivo || '') ? 'image/jpeg' : 'image/png';
+    return c.toDataURL(tipo, 0.92);
   }
 
   global.U = {

@@ -18,8 +18,10 @@ Al abrirla te lleva de la mano: te pide tus datos, te ofrece conectar tu Google
 para que el móvil y el ordenador vayan juntos, y te la instala. Dos minutos.
 
 Con lo que escribas se dibuja tu logotipo: tus iniciales dentro del arco y tu
-nombre debajo. Si tienes el logotipo en un archivo, en **Ajustes** puedes subir
-el tuyo y sustituirlo.
+nombre debajo. Si ya tienes el tuyo hecho, en ese mismo paso tienes **Subir el
+mío** y lo sustituye. Vale PNG, JPG o SVG; el SVG es el que mejor sale
+impreso, porque no se pixela por grande que salga. También puedes cambiarlo
+cuando quieras en **Ajustes → Logotipo y firma**.
 
 Después, un rato tranquilo en **Precios**: ajusta a los tuyos las veinte
 partidas de reforma que vienen de ejemplo. Es lo que más tiempo te va a

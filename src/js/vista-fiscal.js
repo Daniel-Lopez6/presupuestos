@@ -86,7 +86,7 @@
       '<div class="der pequeno tenue">Modelo 303</div></div>' +
       '<div class="tarjeta-cuerpo">' +
         fila('IVA repercutido (cobrado al cliente)', U.eur(r.ingresos.iva)) +
-        fila('IVA soportado deducible', menos(r.gastos.ivaDeducible)) +
+        fila('IVA soportado (el que has pagado tú)', menos(r.gastos.ivaDeducible)) +
         '<div class="linea-sep" style="margin:12px 0"></div>' +
         '<div class="flex" style="justify-content:space-between;align-items:baseline">' +
           '<span style="font-weight:650">' + (aPagar ? 'A ingresar' : 'A compensar') + '</span>' +
@@ -105,7 +105,7 @@
     return '<div class="tarjeta"><div class="tarjeta-cab"><h2>Rendimiento e IRPF</h2>' +
       '<div class="der pequeno tenue">Modelo 130</div></div>' +
       '<div class="tarjeta-cuerpo">' +
-        fila('Ingresos del trimestre (base)', U.eur(r.ingresos.base)) +
+        fila('Ingresos del trimestre, sin IVA', U.eur(r.ingresos.base)) +
         fila('Gastos deducibles', menos(r.gastos.deducible)) +
         fila('Resultado del trimestre', U.eur(r.rendimiento), true) +
         '<div class="linea-sep" style="margin:12px 0"></div>' +
@@ -164,7 +164,7 @@
       '</div></div>' +
       '<div class="tarjeta-cuerpo"><div class="flex" style="align-items:flex-end;gap:8px">' + barras + '</div>' +
       '<div class="linea-sep"></div>' +
-      fila('Ingresos del año (base)', U.eur(anual.trimestres.reduce(function (s, t) { return s + t.ingresos.base; }, 0))) +
+      fila('Ingresos del año, sin IVA', U.eur(anual.trimestres.reduce(function (s, t) { return s + t.ingresos.base; }, 0))) +
       fila('Gastos deducibles del año', U.eur(anual.trimestres.reduce(function (s, t) { return s + t.gastos.deducible; }, 0))) +
       '</div></div>';
   }

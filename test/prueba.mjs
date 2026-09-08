@@ -65,7 +65,17 @@ await pagina.click('.bienvenida [data-siguiente]');
 await pagina.waitForTimeout(120);
 comprueba('el segundo paso pide los datos del emisor',
   (await pagina.locator('.bienvenida [name=b_nif]').count()) === 1);
+// Sin nombre no deja pasar: es lo que encabeza cada presupuesto
+await pagina.click('.bienvenida [data-guardar-datos]');
+await pagina.waitForTimeout(120);
+comprueba('el asistente no continúa sin nombre',
+  (await pagina.locator('.bienvenida [name=b_nombre]').count()) === 1 &&
+  /Hace falta al menos el nombre/.test(await pagina.textContent('.bienvenida')));
 await pagina.fill('.bienvenida [name=b_nombre]', 'Reformas Vega Santos');
+await pagina.waitForTimeout(300);
+comprueba('el logotipo se previsualiza mientras escribes el nombre',
+  /RV/.test(await pagina.innerHTML('#bv-logo-vista')),
+  (await pagina.innerHTML('#bv-logo-vista')).slice(0, 120));
 await pagina.fill('.bienvenida [name=b_nif]', '12345678z');
 await pagina.fill('.bienvenida [name=b_telefono]', '600 000 000');
 await pagina.fill('.bienvenida [name=b_email]', 'obras@ejemplo.es');
@@ -315,7 +325,64 @@ comprueba('los CSV se entregan al visor', descarga.indexOf('prueba.csv') > -1, J
 comprueba('sin errores al descargar', erroresConsola.length === 0, erroresConsola.join(' | '));
 await pagina.evaluate(() => { delete window.claude; });
 
-console.log('\n11. Capturas');
+console.log('\n11. Logotipo propio');
+const logos = await pagina.evaluate(async () => {
+  const pasa = (file, lado) => new Promise((res, rej) =>
+    U.imagenADataURL(file, lado, (e, d) => e ? rej(e) : res(d)));
+
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">' +
+              '<script>alert(1)<\/script><rect width="100" height="40" fill="#B08D57" ' +
+              'onload="alert(2)"/><text x="6" y="26">MI LOGO</text></svg>';
+  const comoSVG = await pasa(new File([svg], 'logo.svg', { type: 'image/svg+xml' }), 1400);
+  const descifrado = atob(comoSVG.split(',')[1]);
+
+  // Un PNG de verdad, generado al vuelo y más grande que el tope
+  const c = document.createElement('canvas');
+  c.width = 2400; c.height = 900;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#16233A'; ctx.fillRect(0, 0, 2400, 900);
+  const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+  const comoPNG = await pasa(new File([blob], 'logo.png', { type: 'image/png' }), 1400);
+  const medido = await new Promise(r => {
+    const i = new Image();
+    i.onload = () => r({ w: i.naturalWidth, h: i.naturalHeight });
+    i.src = comoPNG;
+  });
+
+  let errorGrande = null;
+  try {
+    await pasa(new File([new Uint8Array(9 * 1024 * 1024)], 'enorme.png', { type: 'image/png' }), 1400);
+  } catch (e) { errorGrande = e.message; }
+
+  return { comoSVG, descifrado, comoPNG: comoPNG.slice(0, 30), medido, errorGrande };
+});
+comprueba('un SVG se guarda como vectorial, sin rasterizar',
+  logos.comoSVG.indexOf('data:image/svg+xml;base64,') === 0, logos.comoSVG.slice(0, 40));
+comprueba('el SVG conserva su contenido', /MI LOGO/.test(logos.descifrado));
+comprueba('al SVG se le quitan scripts y manejadores',
+  !/<script/i.test(logos.descifrado) && !/onload=/i.test(logos.descifrado),
+  logos.descifrado.slice(0, 160));
+comprueba('un PNG grande se reduce al lado máximo',
+  logos.comoPNG.indexOf('data:image/png') === 0 && logos.medido.w === 1400,
+  JSON.stringify(logos.medido));
+comprueba('un archivo enorme se rechaza con un aviso claro',
+  /8 MB/.test(logos.errorGrande || ''), String(logos.errorGrande));
+
+const conLogo = await pagina.evaluate(() => {
+  App.estado.ajustes.logo = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg"/>');
+  const zona = document.createElement('div');
+  zona.style.position = 'absolute'; zona.style.left = '-10000px';
+  document.body.appendChild(zona);
+  Doc.render(App.estado, App.estado.presupuestos[0], zona);
+  const img = zona.querySelector('.d-logo');
+  const esImagen = !!img && img.tagName === 'IMG';
+  zona.remove();
+  App.estado.ajustes.logo = null;
+  return esImagen;
+});
+comprueba('el documento usa el logotipo subido cuando lo hay', conLogo === true);
+
+console.log('\n12. Capturas');
 await pagina.evaluate(() => App.ir('panel'));
 await pagina.waitForTimeout(300);
 await pagina.screenshot({ path: join(salida, 'panel.png'), fullPage: true });

@@ -131,7 +131,7 @@
       var err = new Error(
         tipo === 'popup_closed' ? 'Has cerrado la ventana de Google sin terminar' :
         tipo === 'popup_failed_to_open' ? 'El navegador ha bloqueado la ventana de Google' :
-        tipo === 'access_denied' ? 'Google no ha concedido el permiso' :
+        tipo === 'access_denied' ? 'No se ha dado el permiso en la ventana de Google' :
         (e && e.message) || 'Google no ha devuelto el permiso'
       );
       err.necesitaGesto = (tipo === 'popup_failed_to_open' || tipo === 'popup_closed' ||
@@ -148,11 +148,15 @@
       }).then(function (r) {
         if (r.status === 401 || r.status === 403) {
           acceso = null;
-          var e = new Error('Google ha rechazado el permiso. Vuelve a conectar.');
+          var e = new Error('Google ha caducado el permiso. Solo hay que volver a conectar.');
           e.necesitaGesto = true;
           throw e;
         }
-        if (!r.ok) throw new Error('Google ha respondido ' + r.status);
+        if (!r.ok) {
+          var fallo = new Error('Google no ha respondido bien. Prueba otra vez en un momento.');
+          fallo.estado = r.status;
+          throw fallo;
+        }
         return r;
       });
     }
@@ -187,7 +191,7 @@
             .then(function (texto) { return { texto: texto, id: id }; })
             .catch(function (e) {
               // El archivo pudo borrarse desde Drive: se empieza de nuevo
-              if (/40[34]/.test(String(e.message))) { local.archivoId = null; escribeLocal(); return null; }
+              if (e.estado === 404 || e.estado === 403) { local.archivoId = null; escribeLocal(); return null; }
               throw e;
             });
         });
@@ -232,12 +236,12 @@
   function motivoNoDisponible() {
     if (remoto && remoto.nombre === 'prueba') return null;
     if (location.protocol === 'file:') {
-      return 'La sincronización necesita que la aplicación se abra desde una dirección web. ' +
-             'En el archivo local del escritorio no funciona: usa las copias de seguridad.';
+      return 'Esta es la copia que se abre con doble clic, y Google no deja conectarse desde ahí. ' +
+             'Para que el móvil y el ordenador vayan juntos hay que usar la versión de internet.';
     }
     if (global.claude && typeof global.claude.use === 'function') {
-      return 'Esta copia está publicada dentro de Claude y no puede hablar con Google. ' +
-             'Para sincronizar hay que usar la aplicación alojada en su propia dirección web.';
+      return 'Esta copia está publicada dentro de Claude y no puede conectarse con Google. ' +
+             'Para sincronizar hay que usar la versión con su propia dirección de internet.';
     }
     if (!clienteId()) {
       return 'Falta el ID de cliente de Google. Se pega una sola vez aquí abajo y ya queda guardado.';

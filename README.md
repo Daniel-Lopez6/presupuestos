@@ -8,8 +8,10 @@ través del Google Drive del propio usuario.
 
 El código no contiene los datos de ningún usuario: nombre, NIF, dirección,
 teléfono y correo los escribe cada uno la primera vez que la abre, y el
-logotipo se dibuja solo a partir de ese nombre. Por eso el repositorio puede
-ser público sin exponer a nadie.
+logotipo se dibuja solo a partir de ese nombre, o se sube el propio en PNG,
+JPG o SVG. Por eso el repositorio puede ser público sin exponer a nadie, y la
+misma dirección publicada le sirve a cualquiera: cada uno ve sus datos, en su
+navegador y en su Drive.
 
 ## Qué hace
 
@@ -67,7 +69,7 @@ presupuestos-app/
 │       └── vista-*.js     una por pantalla
 ├── test/
 │   ├── privacidad.mjs     13 comprobaciones, sin navegador
-│   ├── prueba.mjs         55 comprobaciones de la aplicación
+│   ├── prueba.mjs         63 comprobaciones de la aplicación
 │   └── prueba-sync.mjs    26 comprobaciones de la sincronización
 └── dist/
     ├── Presupuestos.html  archivo único, doble clic, sin conexión
@@ -153,6 +155,13 @@ seguridad bloquea los scripts de Google. Vale para enseñar la app, no para
 usarla en serio.
 
 ## Decisiones de diseño
+
+**El logotipo, generado o subido.** Sin nada configurado se dibuja un
+monograma con las iniciales y el nombre repartido en dos renglones, en el
+estilo del membrete original. Quien tenga el suyo lo sube: un SVG se guarda
+tal cual, sin rasterizar, porque es lo único que se imprime nítido a cualquier
+tamaño; un PNG o JPG se reduce a 1400 px de lado y, si aun así pasa de 700 KB,
+se vuelve a reducir, porque todo esto vive en el almacenamiento del navegador.
 
 **Ningún dato personal dentro del código.** El repositorio y la página son
 públicos —GitHub Pages solo publica desde repositorios públicos en el plan

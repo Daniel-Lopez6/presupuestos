@@ -126,6 +126,18 @@
             UI.campo({ etiqueta: 'Teléfono', nombre: 'b_telefono', valor: e.telefono }) +
           '</div>' +
           UI.campo({ etiqueta: 'Correo electrónico', tipo: 'email', nombre: 'b_email', valor: e.email }) +
+          '<div class="linea-sep"></div>' +
+          '<div class="etiqueta">Logotipo</div>' +
+          '<div class="bv-logo-fila">' +
+            '<div class="bv-logo-vista" id="bv-logo-vista">' + vistaLogo() + '</div>' +
+            '<div>' +
+              '<label class="btn btn-s">' + UI.ic('subida', 15) + '<span>Subir el mío</span>' +
+                '<input type="file" id="bv-logo" accept="image/*,.svg" hidden></label>' +
+              '<div class="ayuda" style="margin-top:6px">Si no subes ninguno se dibuja con tus ' +
+                'iniciales, como el de la izquierda. PNG, JPG o SVG.</div>' +
+            '</div>' +
+          '</div>' +
+          '<div id="bv-error-datos"></div>' +
           '<div class="bv-botones">' +
             '<button class="btn btn-pri btn-grande" data-guardar-datos>Continuar</button>' +
           '</div>' +
@@ -193,11 +205,49 @@
       }
     };
 
+    // Vista del logotipo: el subido, o el que se dibuja con el nombre
+    function vistaLogo(nombre) {
+      var a = global.App.estado.ajustes;
+      if (a.logo) return '<img src="' + a.logo + '" alt="">';
+      if (nombre === undefined) nombre = a.emisor.nombre;
+      return global.Base.logoDe(nombre) ||
+        '<span class="bv-tenue">Escribe tu nombre y aparecerá aquí</span>';
+    }
+
+    function refrescaLogo(nombre) {
+      var n = caja.querySelector('#bv-logo-vista');
+      if (n) n.innerHTML = vistaLogo(nombre);
+    }
+
     function conecta(paso) {
       var b = function (sel, fn) {
         var n = caja.querySelector(sel);
         if (n) n.addEventListener('click', fn);
       };
+
+      if (paso === 'datos') {
+        var campoNombre = caja.querySelector('[name=b_nombre]');
+        if (campoNombre) {
+          campoNombre.addEventListener('input', U.debounce(function () {
+            campoNombre.classList.remove('invalido');
+            refrescaLogo(campoNombre.value);
+          }, 200));
+        }
+        var subida = caja.querySelector('#bv-logo');
+        if (subida) subida.addEventListener('change', function (ev) {
+          var f = ev.target.files[0];
+          ev.target.value = '';
+          if (!f) return;
+          U.imagenADataURL(f, 1400, function (err, dataUrl) {
+            if (err) return UI.aviso(err.message, 'err', 4200);
+            global.App.estado.ajustes.logo = dataUrl;
+            global.App.tocar(global.App.estado.ajustes);
+            global.App.guardar(true);
+            refrescaLogo();
+            UI.aviso('Logotipo guardado', 'ok');
+          });
+        });
+      }
       b('[data-siguiente]', siguiente);
       b('[data-cerrar]', function () { m.cerrar(); });
       b('[data-primer]', function () {
@@ -207,6 +257,14 @@
       b('[data-guardar-datos]', function () {
         var v = UI.valores(caja);
         var e = global.App.estado.ajustes.emisor;
+        if (!String(v.b_nombre || '').trim()) {
+          var err = caja.querySelector('#bv-error-datos');
+          if (err) err.innerHTML = '<div class="ayuda error">Hace falta al menos el nombre: ' +
+            'es lo que encabeza cada presupuesto.</div>';
+          var campo = caja.querySelector('[name=b_nombre]');
+          if (campo) { campo.classList.add('invalido'); campo.focus(); }
+          return;
+        }
         if (v.b_nombre !== undefined) e.nombre = v.b_nombre.trim();
         if (v.b_nif !== undefined) e.nif = v.b_nif.trim().toUpperCase();
         if (v.b_telefono !== undefined) e.telefono = v.b_telefono.trim();

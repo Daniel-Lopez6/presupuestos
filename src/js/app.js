@@ -92,10 +92,10 @@
     if (Date.now() - avisoFalloDado < 60000) return;
     avisoFalloDado = Date.now();
     UI.modal({
-      titulo: 'No se han podido guardar los cambios',
-      cuerpo: '<p>El navegador ha rechazado la escritura, casi siempre por falta de espacio.</p>' +
-        '<p>Descarga ahora una copia de seguridad para no perder nada. Después puedes ' +
-        'liberar espacio borrando presupuestos antiguos o quitando el logotipo desde Ajustes.</p>',
+      titulo: 'No se han podido guardar los últimos cambios',
+      cuerpo: '<p>Se ha llenado el espacio que el navegador reserva para esta aplicación.</p>' +
+        '<p>Descarga ahora una copia de seguridad para no perder nada. Después puedes hacer ' +
+        'sitio borrando presupuestos viejos, o poniendo un logotipo más ligero desde Ajustes.</p>',
       botones: [
         { texto: 'Seguir' },
         { texto: 'Descargar copia', clase: 'btn-pri', icono: 'descarga', accion: function () { App.exportar(); } }
@@ -204,7 +204,7 @@
   App.importar = function (texto, modo) {
     var datos;
     try { datos = JSON.parse(texto); }
-    catch (e) { throw new Error('El archivo no tiene el formato esperado'); }
+    catch (e) { throw new Error('Ese archivo no se puede leer'); }
     if (!datos || typeof datos !== 'object' || !datos.ajustes) {
       throw new Error('El archivo no parece una copia de esta aplicación');
     }
@@ -327,11 +327,11 @@
     }
     if (!info.fiable) {
       UI.modal({
-        titulo: 'No se pueden guardar los datos',
-        cuerpo: '<p>El navegador no permite guardar información en este contexto, así que ' +
-          'todo lo que hagas se perderá al cerrar la ventana.</p>' +
-          '<p>Suele ocurrir en ventanas de incógnito o con el almacenamiento del sitio bloqueado. ' +
-          'Abre la aplicación en una ventana normal o usa la versión web.</p>',
+        titulo: 'Cuidado: no se está guardando nada',
+        cuerpo: '<p>Este navegador no está dejando guardar, así que todo lo que hagas ahora ' +
+          'se perderá al cerrar la ventana.</p>' +
+          '<p>Suele pasar por dos motivos: que sea una ventana de incógnito, o que el navegador ' +
+          'tenga bloqueado el guardado de esta página. Ciérrala y ábrela en una ventana normal.</p>',
         botones: [{ texto: 'Entendido', clase: 'btn-pri' }]
       });
       return;

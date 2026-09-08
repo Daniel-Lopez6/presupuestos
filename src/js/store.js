@@ -192,10 +192,12 @@
   }
 
   function info() {
+    // Al usuario le da igual la tecnología: lo que necesita saber es si sus
+    // datos están a salvo o no.
     var etiquetas = {
-      idb: 'Base de datos del navegador (IndexedDB)',
-      ls: 'Almacenamiento local del navegador',
-      memoria: 'Solo memoria — los datos se perderán al cerrar'
+      idb: 'Todo se guarda en este dispositivo',
+      ls: 'Todo se guarda en este dispositivo',
+      memoria: 'No se está guardando nada'
     };
     return {
       motor: motor,

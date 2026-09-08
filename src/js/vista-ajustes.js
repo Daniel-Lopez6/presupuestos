@@ -63,11 +63,12 @@
         '</div>' +
         '<div class="flex" style="gap:8px;flex-wrap:wrap;margin-bottom:6px">' +
           '<label class="btn btn-s">' + UI.ic('subida', 15) + '<span>Subir logotipo</span>' +
-            '<input type="file" id="aj-logo" accept="image/*" hidden></label>' +
+            '<input type="file" id="aj-logo" accept="image/*,.svg" hidden></label>' +
           (a.logo ? '<button class="btn btn-s" id="aj-logo-quitar">Volver al generado</button>' : '') +
         '</div>' +
         '<div class="ayuda">Si no subes ninguno, se dibuja con tus iniciales y tu nombre. ' +
-          'Para uno propio: PNG o JPG, se guarda dentro de la aplicación y se reduce solo.</div>' +
+          'Si tienes el tuyo: PNG, JPG o SVG. El SVG es el que mejor sale impreso, ' +
+          'porque no pierde nitidez por grande que se imprima.</div>' +
         '<label class="check" style="margin-top:12px"><input type="checkbox" name="mostrarLogo"' +
           (a.mostrarLogo !== false ? ' checked' : '') + '><span>Mostrar el logotipo en el documento</span></label>' +
 
@@ -79,7 +80,7 @@
         '</div>' +
         '<div class="flex" style="gap:8px;flex-wrap:wrap">' +
           '<label class="btn btn-s">' + UI.ic('subida', 15) + '<span>Subir firma</span>' +
-            '<input type="file" id="aj-firma" accept="image/*" hidden></label>' +
+            '<input type="file" id="aj-firma" accept="image/*,.svg" hidden></label>' +
           (a.firma ? '<button class="btn btn-s" id="aj-firma-quitar">Quitar</button>' : '') +
         '</div>' +
       '</div></div>';
@@ -139,9 +140,9 @@
           '<div><b>' + U.esc(info.etiqueta) + '</b><br>' +
             (info.fiable
               ? (global.Sync && global.Sync.activo()
-                  ? 'Los datos están en este dispositivo y en tu propio Google Drive. En ningún sitio más.'
-                  : 'Todo se guarda solo en este dispositivo. Ni se envía ni se comparte con nadie.')
-              : 'No se puede guardar nada. Abre la aplicación en una ventana normal del navegador.') +
+                  ? 'Están aquí y en tu propio Google Drive. En ningún sitio más.'
+                  : 'No se envían a ninguna parte ni los ve nadie más.')
+              : 'Ábrela en una ventana normal del navegador, no de incógnito.') +
           '</div></div>' +
         '<div class="rejilla rej-2" style="gap:10px;margin-bottom:16px">' +
           mini('Presupuestos', e.presupuestos.length) +
@@ -276,13 +277,13 @@
       if (n) n.textContent = Modelo.formateaNumero(a, a.numeracion.siguiente, a.numeracion.anio);
     }
 
-    imagen('aj-logo', 640, function (dataUrl) {
+    imagen('aj-logo', 1400, function (dataUrl) {
       a.logo = dataUrl;
       guarda();
       App.refrescar();
       UI.aviso('Logotipo actualizado', 'ok');
     });
-    imagen('aj-firma', 480, function (dataUrl) {
+    imagen('aj-firma', 900, function (dataUrl) {
       a.firma = dataUrl;
       guarda();
       App.refrescar();
@@ -305,12 +306,12 @@
           cuerpo: '<p style="margin-top:0">¿Cómo quieres restaurar los datos del archivo ' +
             '<b>' + U.esc(f.name) + '</b>?</p>' +
             '<div class="aviso aviso-oro" style="margin-bottom:0">' + UI.ic('aviso', 15) +
-            '<div><b>Reemplazar</b> borra todo lo que hay ahora y deja solo lo de la copia. ' +
-            '<b>Fusionar</b> mantiene lo actual y añade lo que falte.</div></div>',
+            '<div><b>Juntar</b> deja lo que ya tienes y añade lo que traiga la copia. ' +
+            '<b>Reemplazar</b> borra todo lo de ahora y deja solo lo de la copia.</div></div>',
           sinFoco: true,
           botones: [
             { texto: 'Cancelar' },
-            { texto: 'Fusionar', accion: function () { restaura(texto, 'fusionar'); } },
+            { texto: 'Juntar con lo mío', accion: function () { restaura(texto, 'fusionar'); } },
             { texto: 'Reemplazar todo', clase: 'btn-peligro', accion: function () { restaura(texto, 'reemplazar'); } }
           ]
         });

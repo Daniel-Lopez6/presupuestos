@@ -586,6 +586,27 @@ select { appearance: none; background-image: url("data:image/svg+xml;charset=utf
 .bv-logo svg { width: 100%; height: auto; }
 .bv-marca { width: 96px; margin: 0 auto 22px; }
 .bv-marca svg { width: 100%; height: auto; }
+.bv-logo-fila {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.bv-logo-vista {
+  flex: 0 0 auto;
+  width: 190px;
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F7F8FA;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-s);
+  padding: 10px;
+  text-align: center;
+}
+.bv-logo-vista svg, .bv-logo-vista img { max-width: 100%; max-height: 62px; height: auto; }
+.bv-logo-fila > div:last-child { flex: 1 1 180px; }
 .bv-icono {
   width: 76px; height: 76px;
   margin: 0 auto 20px;

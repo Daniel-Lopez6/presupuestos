@@ -419,7 +419,7 @@
   function bloquePeligro(p) {
     return '<div class="tarjeta"><div class="tarjeta-cuerpo flex" style="flex-wrap:wrap;gap:10px">' +
       '<button class="btn" id="ed-duplicar">' + UI.ic('copiar', 16) + '<span>Duplicar</span></button>' +
-      '<button class="btn" id="ed-exportar">' + UI.ic('descarga', 16) + '<span>Guardar copia del documento</span></button>' +
+      '<button class="btn" id="ed-exportar">' + UI.ic('descarga', 16) + '<span>Guardar como archivo</span></button>' +
       '<span class="flex-fin"></span>' +
       '<button class="btn btn-peligro" id="ed-borrar">' + UI.ic('papelera', 16) + '<span>Eliminar presupuesto</span></button>' +
       '</div></div>';
@@ -557,7 +557,7 @@
     enlaza('ed-duplicar', function () { duplicar(p); });
     enlaza('ed-exportar', function () {
       Doc.exportarHTML(App.estado, p);
-      UI.aviso('Documento guardado como página web', 'ok');
+      UI.aviso('Presupuesto guardado como archivo', 'ok');
     });
     enlaza('ed-cond-reset', function () {
       p.condiciones = App.estado.ajustes.condiciones.slice();
