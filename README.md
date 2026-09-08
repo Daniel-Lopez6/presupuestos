@@ -66,11 +66,13 @@ presupuestos-app/
 │       ├── fusion.js      mezcla de dos copias registro a registro
 │       ├── sync.js        transporte con Google Drive y ciclo de sincronía
 │       ├── app.js         estado global, navegación, copias
+│       ├── demo.js        un año de datos de ejemplo, cargable y borrable
 │       └── vista-*.js     una por pantalla
 ├── test/
 │   ├── privacidad.mjs     13 comprobaciones, sin navegador
-│   ├── prueba.mjs         63 comprobaciones de la aplicación
-│   └── prueba-sync.mjs    26 comprobaciones de la sincronización
+│   ├── prueba.mjs         99 comprobaciones de la aplicación
+│   ├── prueba-sync.mjs    26 comprobaciones de la sincronización
+│   └── botones.mjs        pulsa los 252 botones de las ocho pantallas
 └── dist/
     ├── Presupuestos.html  archivo único, doble clic, sin conexión
     ├── artifact.html      contenido para publicar como página alojada
@@ -229,6 +231,7 @@ npm test                    # las tres tandas seguidas
 node test/privacidad.mjs    # sin navegador, rápida
 node test/prueba.mjs        # requiere playwright instalado
 node test/prueba-sync.mjs   # dos navegadores contra un Drive de mentira
+node test/botones.mjs       # repaso de todos los botones, tarda unos 3 min
 ```
 
 El build no instala nada: lee `src/`, incrusta CSS, JavaScript e iconos en un
@@ -238,6 +241,14 @@ Las pruebas abren la aplicación en Chromium y verifican cálculos con IVA e
 IRPF, paginación con 15 y con 60 partidas, ausencia de desbordes, persistencia
 tras recargar, resumen trimestral, descargas dentro de una página publicada y
 recorrido por las siete pantallas. Dejan capturas y un PDF en `test/salida/`.
+
+`botones.mjs` recorre las ocho pantallas, pulsa uno a uno todos los botones
+visibles y comprueba que ninguno lanza una excepción, que la aplicación sigue
+utilizable después y que no se pierden datos por el camino. Salta a propósito
+los que borran todo o abren la ventana de Google. Los que avisa como «no
+cambió nada visible» son los esperables: el botón de la pantalla en la que ya
+estás, un filtro ya activo y las etiquetas que abren el selector de archivos
+del sistema.
 
 `prueba-sync.mjs` levanta dos navegadores aislados —el ordenador y el móvil—
 contra un Drive simulado en el propio proceso, y comprueba el viaje de ida y

@@ -182,6 +182,9 @@
         '<div class="flex" style="gap:8px;flex-wrap:wrap">' +
           '<button class="btn" id="aj-asistente">' + UI.ic('bombilla', 15) +
             '<span>Repetir la puesta en marcha</span></button>' +
+          (global.Demo ? '<button class="btn" id="aj-demo">' + UI.ic('bombilla', 15) +
+            '<span>' + (hayDemo() ? 'Quitar los datos de ejemplo' : 'Cargar datos de ejemplo') +
+            '</span></button>' : '') +
           (global.Bienvenida && global.Bienvenida.sePuedeInstalar()
             ? '<button class="btn" id="aj-instalar">' + UI.ic('descarga', 15) +
               '<span>Instalar en este dispositivo</span></button>' : '') +
@@ -360,6 +363,8 @@
       });
     });
 
+    boton('aj-demo', cargaOQuitaDemo);
+
     boton('aj-asistente', function () {
       if (!global.Bienvenida) return;
       App.estado.ajustes.bienvenidaVista = false;
@@ -457,6 +462,60 @@
     } catch (err) {
       UI.aviso(err.message || 'No se ha podido leer el archivo', 'err', 4200);
     }
+  }
+
+  /* --- Datos de ejemplo ---------------------------------------------------
+     Sirven para ver la aplicación llena antes de usarla de verdad. Se
+     reconocen porque su identificador empieza por demo, así que se pueden
+     quitar de golpe sin tocar nada de lo que hayas metido tú. */
+
+  function esDemo(r) { return typeof r.id === 'string' && r.id.indexOf('_demo_') > 0; }
+
+  function hayDemo() {
+    return ['presupuestos', 'clientes', 'gastos'].some(function (col) {
+      return (App.estado[col] || []).some(esDemo);
+    });
+  }
+
+  function cargaOQuitaDemo() {
+    if (hayDemo()) return quitaDemo();
+    UI.confirmar({
+      titulo: 'Cargar datos de ejemplo',
+      html: 'Se añaden clientes, presupuestos y gastos inventados de lo que va de año, ' +
+        'para que veas la aplicación llena y puedas trastear sin miedo.<br><br>' +
+        'Lo tuyo no se toca, y desde este mismo botón puedes quitarlos cuando quieras.',
+      aceptar: 'Cargar'
+    }).then(function (si) {
+      if (!si) return;
+      var d = global.Demo.generar(App.estado);
+      App.tocar(App.estado.ajustes);
+      App.estado.clientes = App.estado.clientes.concat(d.clientes);
+      App.estado.presupuestos = App.estado.presupuestos.concat(d.presupuestos);
+      App.estado.gastos = App.estado.gastos.concat(d.gastos);
+      App.guardar().then(function () {
+        App.ir('panel');
+        UI.aviso('Datos de ejemplo cargados', 'ok');
+      });
+    });
+  }
+
+  function quitaDemo() {
+    UI.confirmar({
+      titulo: 'Quitar los datos de ejemplo',
+      html: 'Se borran solo los clientes, presupuestos y gastos de ejemplo. ' +
+        'Todo lo que hayas metido tú se queda como está.',
+      aceptar: 'Quitar', peligro: true
+    }).then(function (si) {
+      if (!si) return;
+      ['presupuestos', 'clientes', 'gastos'].forEach(function (col) {
+        App.estado[col].filter(esDemo).forEach(function (r) { global.Fusion.anotaBorrado(App.estado, r.id); });
+        App.estado[col] = App.estado[col].filter(function (r) { return !esDemo(r); });
+      });
+      App.guardar().then(function () {
+        App.refrescar();
+        UI.aviso('Datos de ejemplo quitados', 'ok');
+      });
+    });
   }
 
   function boton(id, fn) {

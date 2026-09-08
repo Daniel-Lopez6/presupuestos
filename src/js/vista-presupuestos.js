@@ -350,10 +350,14 @@
         '<div class="fila-campos fc-3">' +
           UI.campo({ etiqueta: 'Descuento global (%)', tipo: 'number', nombre: 'descuentoGlobal', valor: p.descuentoGlobal, paso: '0.01', min: 0 }) +
           UI.campo({ etiqueta: 'IVA', tipo: 'select', nombre: 'ivaPct', valor: p.ivaPct,
-                     opciones: Base.TIPOS_IVA.map(function (t) { return { valor: t.valor, nombre: t.nombre }; }) }) +
+                     opciones: Base.TIPOS_IVA.map(function (t) { return { valor: t.valor, nombre: t.nombre }; }),
+                     ayuda: 'El 10 % pide tres cosas a la vez: que el cliente sea un particular o una ' +
+                            'comunidad de vecinos, que la vivienda tenga más de dos años, y que el ' +
+                            'material que pongas tú no pase del 40 % del importe sin IVA. Si falla una, va al 21 %.' }) +
           UI.campo({ etiqueta: 'Retención de IRPF', tipo: 'select', nombre: 'irpfPct', valor: p.irpfPct,
                      opciones: Base.TIPOS_IRPF.map(function (t) { return { valor: t.valor, nombre: t.nombre }; }),
-                     ayuda: 'Solo cuando el cliente es empresa o profesional y practica retención.' }) +
+                     ayuda: 'En obras y reformas casi siempre va sin retención: la llevan las actividades ' +
+                            'profesionales, no las empresariales. Déjalo en cero salvo que tu gestor te diga otra cosa.' }) +
         '</div>' +
         '<div id="caja-resumen">' + resumenHTML(p) + '</div>' +
       '</div></div>';

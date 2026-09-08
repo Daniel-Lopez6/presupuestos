@@ -204,13 +204,16 @@
                    ] }) +
       '</div>' +
       '<div class="linea-sep"></div>' +
-      '<div class="fila-campos fc-3">' +
+      '<div class="fila-campos fc-4">' +
         UI.campo({ etiqueta: 'Base imponible', tipo: 'number', nombre: 'base', valor: g.base, paso: '0.01', min: 0 }) +
         UI.campo({ etiqueta: 'IVA', tipo: 'select', nombre: 'ivaPct', valor: g.ivaPct,
                    opciones: [{ valor: 21, nombre: '21 %' }, { valor: 10, nombre: '10 %' },
                               { valor: 4, nombre: '4 %' }, { valor: 0, nombre: 'Sin IVA' }] }) +
         UI.campo({ etiqueta: 'Afectación a la actividad (%)', tipo: 'number', nombre: 'afectacion',
                    valor: g.afectacion === null || g.afectacion === undefined ? '' : g.afectacion,
+                   paso: '1', min: 0, attrs: ' max="100" placeholder="según categoría"' }) +
+        UI.campo({ etiqueta: 'IVA deducible (%)', tipo: 'number', nombre: 'ivaAfectacion',
+                   valor: g.ivaAfectacion === null || g.ivaAfectacion === undefined ? '' : g.ivaAfectacion,
                    paso: '1', min: 0, attrs: ' max="100" placeholder="según categoría"' }) +
       '</div>' +
       '<div id="g-calculo"></div>' +
@@ -220,7 +223,8 @@
       var v = UI.valores(caja);
       var tmp = {
         base: v.base, ivaPct: v.ivaPct, categoria: v.categoria,
-        afectacion: v.afectacion === '' ? null : U.num(v.afectacion)
+        afectacion: v.afectacion === '' ? null : U.num(v.afectacion),
+        ivaAfectacion: v.ivaAfectacion === '' ? null : U.num(v.ivaAfectacion)
       };
       var t = Modelo.totalesGasto(tmp);
       var cat = Base.categoria(v.categoria);
@@ -288,6 +292,7 @@
     g.base = U.num(v.base);
     g.ivaPct = U.num(v.ivaPct);
     g.afectacion = v.afectacion === '' ? null : U.num(v.afectacion);
+    g.ivaAfectacion = v.ivaAfectacion === '' ? null : U.num(v.ivaAfectacion);
     g.notas = (v.notas || '').trim();
     App.tocar(g);
     return true;

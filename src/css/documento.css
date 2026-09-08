@@ -300,7 +300,21 @@
 @page { size: A4 portrait; margin: 0; }
 
 @media print {
-  html, body { background: #fff !important; }
+  /* La altura al 100 % y cualquier overflow oculto recortan la impresión a
+     una sola página, incluido el overflow que deja puesto un modal abierto. */
+  html, body {
+    background: #fff !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #zona-impresion {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: auto !important;
+  }
   body.imprimiendo > *:not(#zona-impresion) { display: none !important; }
   #zona-impresion { display: block !important; position: static !important; }
   #zona-impresion .d-pag {

@@ -14,7 +14,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..', 'src');
 const salida = join(dirname(fileURLToPath(import.meta.url)), 'salida');
@@ -249,14 +249,23 @@ const fiscal = await pagina.evaluate((id) => {
 }, datos.id);
 comprueba('los ingresos del 1T son el presupuesto aceptado',
   Math.abs(fiscal.r.ingresos.base - fiscal.base) < 0.005, fiscal.r.ingresos.base + ' vs ' + fiscal.base);
-comprueba('gasto deducible = 1000 + 100 (50 % gasoil) + 320',
-  Math.abs(fiscal.r.gastos.deducible - 1420) < 0.005, String(fiscal.r.gastos.deducible));
-comprueba('IVA soportado deducible = 210 + 21 (50 %)',
+// El coche particular es el caso raro: la mitad del IVA, nada en IRPF
+comprueba('el gasoil del coche particular no baja el IRPF',
+  Math.abs(fiscal.r.gastos.deducible - 1320) < 0.005, String(fiscal.r.gastos.deducible));
+comprueba('pero su IVA sí se deduce al 50 %',
   Math.abs(fiscal.r.gastos.ivaDeducible - 231) < 0.005, String(fiscal.r.gastos.ivaDeducible));
+const furgo = await pagina.evaluate(() => Modelo.totalesGasto(
+  { base: 200, ivaPct: 21, categoria: 'furgoneta_comb', afectacion: null }));
+comprueba('la furgoneta de trabajo sí se deduce entera',
+  furgo.gastoDeducible === 200 && Math.abs(furgo.ivaDeducible - 42) < 0.005, JSON.stringify(furgo));
+const bajado = await pagina.evaluate(() => Modelo.totalesGasto(
+  { base: 100, ivaPct: 21, categoria: 'telefonia', afectacion: 60 }));
+comprueba('bajar la afectación de un gasto normal baja también su IVA',
+  bajado.gastoDeducible === 60 && Math.abs(bajado.ivaDeducible - 12.6) < 0.005, JSON.stringify(bajado));
 comprueba('IVA a liquidar = repercutido − soportado',
   Math.abs(fiscal.r.ivaLiquidar - (fiscal.iva - 231)) < 0.005, String(fiscal.r.ivaLiquidar));
 comprueba('rendimiento = ingresos − gastos deducibles',
-  Math.abs(fiscal.r.rendimiento - (fiscal.base - 1420)) < 0.005, String(fiscal.r.rendimiento));
+  Math.abs(fiscal.r.rendimiento - (fiscal.base - 1320)) < 0.005, String(fiscal.r.rendimiento));
 
 const p130 = await pagina.evaluate(() => Modelo.resumenAnual(App.estado, new Date().getFullYear(), 1).acumulado);
 comprueba('el pago fraccionado descuenta las retenciones',
@@ -382,7 +391,280 @@ const conLogo = await pagina.evaluate(() => {
 });
 comprueba('el documento usa el logotipo subido cuando lo hay', conLogo === true);
 
-console.log('\n12. Capturas');
+console.log('\n12. Impresión de verdad');
+// El fallo que esto vigila: el contenedor de impresión estaba oculto con
+// display:none, y lo oculto mide cero, así que la paginación metía todo en
+// una sola hoja. En pantalla se veía bien y el PDF salía de una página.
+const impresion = await pagina.evaluate((id) => {
+  const zona = document.getElementById('zona-impresion');
+  Doc.render(App.estado, App.presupuesto(id), zona);
+  const estilo = getComputedStyle(zona);
+  return {
+    paginas: zona.querySelectorAll('.d-pag').length,
+    filas: zona.querySelectorAll('.d-tabla tbody tr').length,
+    display: estilo.display,
+    ancho: Math.round(zona.getBoundingClientRect().width)
+  };
+}, datos.id);
+comprueba('el contenedor de impresión se puede medir', impresion.display !== 'none', impresion.display);
+comprueba('tiene el ancho de un A4', Math.abs(impresion.ancho - 794) <= 2, String(impresion.ancho));
+comprueba('el documento a imprimir se reparte en 2 páginas', impresion.paginas === 2, String(impresion.paginas));
+comprueba('no se pierde ninguna fila al imprimir', impresion.filas === 19, String(impresion.filas));
+
+// Y con la vista previa abierta, que deja la página con overflow oculto
+const conModal = await pagina.evaluate((id) => {
+  document.body.style.overflow = 'hidden';          // lo que hace un modal
+  const zona = document.getElementById('zona-impresion');
+  Doc.render(App.estado, App.presupuesto(id), zona);
+  document.body.classList.add('imprimiendo');
+  const previo = document.body.style.overflow;
+  document.body.style.overflow = '';
+  const r = { paginas: zona.querySelectorAll('.d-pag').length, overflowAntes: previo };
+  document.body.classList.remove('imprimiendo');
+  zona.innerHTML = '';
+  return r;
+}, datos.id);
+comprueba('también son 2 páginas con la vista previa abierta', conModal.paginas === 2, String(conModal.paginas));
+
+// El PDF de verdad, contando páginas dentro del archivo
+await pagina.evaluate((id) => {
+  const zona = document.getElementById('zona-impresion');
+  Doc.render(App.estado, App.presupuesto(id), zona);
+  document.body.classList.add('imprimiendo');
+  document.body.style.overflow = '';
+}, datos.id);
+await pagina.waitForTimeout(200);
+const rutaPDF = join(salida, 'impresion.pdf');
+await pagina.pdf({ path: rutaPDF, format: 'A4', printBackground: true,
+                   margin: { top: 0, bottom: 0, left: 0, right: 0 } });
+const crudo = readFileSync(rutaPDF).toString('latin1');
+const hojas = (crudo.split('/Type /Page').length - 1) - (crudo.split('/Type /Pages').length - 1);
+comprueba('el PDF descargado tiene las 2 páginas', hojas === 2, String(hojas));
+await pagina.evaluate(() => {
+  document.body.classList.remove('imprimiendo');
+  document.getElementById('zona-impresion').innerHTML = '';
+});
+
+// El caso de los suministros de casa: dos porcentajes distintos en el mismo
+// recibo. En IRPF el 30 % de la parte afecta; en IVA la proporción de uso real.
+const casa = await pagina.evaluate(() => Modelo.totalesGasto(
+  { base: 100, ivaPct: 21, categoria: 'suministros_casa', afectacion: 6, ivaAfectacion: 20 }));
+comprueba('los suministros de casa admiten un IVA distinto de la afectación',
+  casa.gastoDeducible === 6 && casa.ivaDeducible === 4.2, JSON.stringify(casa));
+const casaSinIva = await pagina.evaluate(() => Modelo.totalesGasto(
+  { base: 100, ivaPct: 21, categoria: 'suministros_casa', afectacion: 6 }));
+comprueba('sin escribirlo, los suministros de casa siguen sin deducir IVA',
+  casaSinIva.ivaDeducible === 0, JSON.stringify(casaSinIva));
+const tope = await pagina.evaluate(() => Modelo.totalesGasto(
+  { base: 100, ivaPct: 21, categoria: 'materiales', ivaAfectacion: 250 }));
+comprueba('un porcentaje de IVA disparatado se recorta al 100 %',
+  tope.ivaDeduciblePct === 100, String(tope.ivaDeduciblePct));
+
+console.log('\n13. Categorías del banco de precios');
+// El tío también hace fontanería: tiene que poder crear sus propias
+// cajetillas y borrar las de ejemplo que no use.
+await pagina.evaluate(() => App.ir('precios'));
+await pagina.waitForTimeout(250);
+const chipsIniciales = await pagina.locator('[data-cat]').count();
+comprueba('las categorías salen como botones con su cuenta',
+  chipsIniciales > 1 && /\d/.test(await pagina.textContent('[data-cat="todas"]')),
+  await pagina.textContent('[data-cat="todas"]'));
+
+// Crear una nueva
+await pagina.click('#cat-nueva');
+await pagina.waitForTimeout(150);
+await pagina.fill('.velo [name=cat]', 'Fontanería');
+await pagina.click('.velo .modal-pie button:has-text("Crear")');
+await pagina.waitForTimeout(250);
+comprueba('se puede crear una categoría nueva',
+  (await pagina.locator('[data-cat="Fontanería"]').count()) === 1);
+comprueba('la categoría nueva queda guardada en los ajustes',
+  await pagina.evaluate(() => (App.estado.ajustes.categoriasPrecios || []).indexOf('Fontanería') >= 0));
+
+// No deja repetir nombre
+await pagina.click('#cat-nueva');
+await pagina.waitForTimeout(150);
+await pagina.fill('.velo [name=cat]', 'fontaneria');
+await pagina.click('.velo .modal-pie button:has-text("Crear")');
+await pagina.waitForTimeout(150);
+comprueba('avisa si el nombre ya existe',
+  (await pagina.locator('.velo').count()) === 1 &&
+  (await pagina.evaluate(() => Base.categoriasDe(App.estado).filter(c => U.normaliza(c) === 'fontaneria').length)) === 1);
+await pagina.click('.velo .modal-pie button:has-text("Cancelar")');
+await pagina.waitForTimeout(150);
+
+// Una partida dentro de la categoría nueva
+await pagina.evaluate(async () => {
+  const np = { id: U.uid('par'), codigo: 'FON01', descripcion: 'Sustitución de bajante',
+               unidad: 'ml', precio: 42, categoria: 'Fontanería', usos: 0 };
+  App.tocar(np); App.estado.partidas.push(np);
+  await App.guardar();
+  App.refrescar();
+});
+await pagina.waitForTimeout(250);
+comprueba('la categoría nueva cuenta sus partidas',
+  /1/.test(await pagina.textContent('[data-cat="Fontanería"]')),
+  await pagina.textContent('[data-cat="Fontanería"]'));
+
+// Renombrar: tiene que arrastrar las partidas
+await pagina.click('[data-cat="Fontanería"]');
+await pagina.waitForTimeout(200);
+comprueba('al elegir una categoría aparecen los botones de renombrar y borrar',
+  (await pagina.locator('#cat-renombrar').count()) === 1 &&
+  (await pagina.locator('#cat-borrar').count()) === 1);
+await pagina.click('#cat-renombrar');
+await pagina.waitForTimeout(150);
+await pagina.fill('.velo [name=cat]', 'Fontanería y desagües');
+await pagina.click('.velo .modal-pie button:has-text("Guardar")');
+await pagina.waitForTimeout(250);
+comprueba('al renombrar se cambia también en las partidas',
+  (await pagina.evaluate(() => App.estado.partidas.filter(p => p.categoria === 'Fontanería y desagües').length)) === 1 &&
+  (await pagina.evaluate(() => App.estado.partidas.filter(p => p.categoria === 'Fontanería').length)) === 0);
+comprueba('el nombre viejo desaparece de la lista',
+  (await pagina.evaluate(() => Base.categoriasDe(App.estado).indexOf('Fontanería'))) === -1);
+
+// Borrar conservando las partidas
+await pagina.click('#cat-borrar');
+await pagina.waitForTimeout(200);
+comprueba('antes de borrar avisa de cuántas partidas hay dentro',
+  /1<\/b> partida/.test(await pagina.innerHTML('.velo .modal-cuerpo')));
+await pagina.click('.velo .modal-pie button:has-text("Conservar las partidas")');
+await pagina.waitForTimeout(250);
+const conservada = await pagina.evaluate(() => {
+  const p = App.estado.partidas.find(x => x.codigo === 'FON01');
+  return { existe: !!p, categoria: p ? p.categoria : null,
+           enLista: Base.categoriasDe(App.estado).indexOf('Fontanería y desagües') };
+});
+comprueba('borrando la categoría se conservan las partidas',
+  conservada.existe === true && conservada.categoria === '', JSON.stringify(conservada));
+comprueba('la categoría borrada ya no aparece', conservada.enLista === -1);
+
+// Borrar también las partidas
+await pagina.evaluate(async () => {
+  App.estado.ajustes.categoriasPrecios = (App.estado.ajustes.categoriasPrecios || []).concat(['Prueba']);
+  const np = { id: U.uid('par'), codigo: 'PRU01', descripcion: 'Partida de prueba',
+               unidad: 'ud', precio: 1, categoria: 'Prueba', usos: 0 };
+  App.tocar(np); App.estado.partidas.push(np);
+  await App.guardar();
+  App.refrescar();
+});
+await pagina.waitForTimeout(200);
+await pagina.click('[data-cat="Prueba"]');
+await pagina.waitForTimeout(200);
+await pagina.click('#cat-borrar');
+await pagina.waitForTimeout(200);
+await pagina.click('.velo .modal-pie button:has-text("Borrar también las partidas")');
+await pagina.waitForTimeout(250);
+const borrada = await pagina.evaluate(() => ({
+  queda: App.estado.partidas.filter(p => p.codigo === 'PRU01').length,
+  enLista: Base.categoriasDe(App.estado).indexOf('Prueba'),
+  lapida: Object.keys((App.estado.borrados || {})).length
+}));
+comprueba('borrando la categoría con sus partidas se van las dos',
+  borrada.queda === 0 && borrada.enLista === -1, JSON.stringify(borrada));
+comprueba('el borrado deja constancia para que no vuelva al sincronizar',
+  borrada.lapida > 0, String(borrada.lapida));
+
+// Una categoría vacía se borra sin preguntar por las partidas
+await pagina.evaluate(async () => {
+  App.estado.ajustes.categoriasPrecios = (App.estado.ajustes.categoriasPrecios || []).concat(['Vacía']);
+  await App.guardar();
+  App.refrescar();
+});
+await pagina.waitForTimeout(200);
+await pagina.click('[data-cat="Vacía"]');
+await pagina.waitForTimeout(200);
+await pagina.click('#cat-borrar');
+await pagina.waitForTimeout(200);
+comprueba('una categoría vacía avisa de que no se pierde nada',
+  /no se pierde ninguna partida/.test(await pagina.textContent('.velo .modal-cuerpo')));
+await pagina.click('.velo .modal-pie button:has-text("Borrar")');
+await pagina.waitForTimeout(250);
+comprueba('la categoría vacía se borra',
+  (await pagina.evaluate(() => Base.categoriasDe(App.estado).indexOf('Vacía'))) === -1);
+
+// Al guardar una partida con una categoría escrita a mano, queda registrada
+await pagina.evaluate(async () => {
+  const np = { id: U.uid('par'), codigo: 'CAR01', descripcion: 'Puerta de paso',
+               unidad: 'ud', precio: 180, categoria: 'Carpintería', usos: 0 };
+  App.tocar(np); App.estado.partidas.push(np);
+  await App.guardar();
+  App.refrescar();
+});
+await pagina.waitForTimeout(250);
+comprueba('una categoría escrita en una partida aparece sola en los botones',
+  (await pagina.locator('[data-cat="Carpintería"]').count()) === 1);
+await pagina.evaluate(() => App.ir('precios'));
+await pagina.waitForTimeout(200);
+
+console.log('\n14. Datos de ejemplo');
+// Se cargan desde Ajustes, tienen que dejar el resumen trimestral con
+// contenido y poder quitarse sin llevarse por delante lo del usuario.
+const antesDemo = await pagina.evaluate(() => ({
+  pres: App.estado.presupuestos.length, cli: App.estado.clientes.length, gas: App.estado.gastos.length }));
+await pagina.evaluate(() => App.ir('ajustes'));
+await pagina.waitForTimeout(300);
+comprueba('el botón de datos de ejemplo está en Ajustes',
+  (await pagina.locator('#aj-demo').count()) === 1);
+await pagina.click('#aj-demo');
+await pagina.waitForTimeout(200);
+await pagina.click('.velo .modal-pie button:has-text("Cargar")');
+await pagina.waitForTimeout(600);
+const demo = await pagina.evaluate(() => {
+  const anio = new Date().getFullYear();
+  const t = Math.floor(new Date().getMonth() / 3) + 1;
+  const r = Modelo.resumen(App.estado, anio, t);
+  const an = Modelo.resumenAnual(App.estado, anio, t).acumulado;
+  const estados = {};
+  App.estado.presupuestos.forEach(p => { estados[p.estado] = (estados[p.estado] || 0) + 1; });
+  return { pres: App.estado.presupuestos.length, cli: App.estado.clientes.length,
+           gas: App.estado.gastos.length, estados: estados,
+           ingresos: r.ingresos.base, gastos: r.gastos.deducible, pago130: an.pago130,
+           ivas: Array.from(new Set(App.estado.presupuestos.map(p => p.ivaPct))).sort(),
+           futuros: App.estado.gastos.filter(g => g.fecha > U.hoyISO()).length };
+});
+comprueba('cargan clientes, presupuestos y gastos de ejemplo',
+  demo.pres > antesDemo.pres && demo.cli > antesDemo.cli && demo.gas > 50,
+  JSON.stringify({ pres: demo.pres, cli: demo.cli, gas: demo.gas }));
+comprueba('el resumen del trimestre deja de estar vacío',
+  demo.ingresos > 0 && demo.gastos > 0 && demo.pago130 > 0,
+  JSON.stringify({ ing: demo.ingresos, gas: demo.gastos, p130: demo.pago130 }));
+comprueba('hay presupuestos en todos los estados',
+  ['borrador', 'enviado', 'aceptado', 'rechazado', 'caducado'].every(e => demo.estados[e] > 0),
+  JSON.stringify(demo.estados));
+comprueba('hay obras al 10 % y locales al 21 %',
+  demo.ivas.indexOf(10) >= 0 && demo.ivas.indexOf(21) >= 0, JSON.stringify(demo.ivas));
+comprueba('ningún gasto de ejemplo tiene fecha futura', demo.futuros === 0, String(demo.futuros));
+const nifsDemo = await pagina.evaluate(() => {
+  const malos = [];
+  App.estado.clientes.forEach(c => { if (c.nif && !U.validaNIF(c.nif).ok) malos.push(c.nombre + ' ' + c.nif); });
+  App.estado.gastos.forEach(g => { if (g.nif && !U.validaNIF(g.nif).ok) malos.push(g.proveedor + ' ' + g.nif); });
+  return malos;
+});
+comprueba('los NIF de ejemplo pasan la validación', nifsDemo.length === 0, nifsDemo.join(' | '));
+// Y quitarlos deja exactamente lo de antes
+await pagina.evaluate(() => App.ir('ajustes'));
+await pagina.waitForTimeout(300);
+await pagina.click('#aj-demo');
+await pagina.waitForTimeout(200);
+await pagina.click('.velo .modal-pie button:has-text("Quitar")');
+await pagina.waitForTimeout(600);
+const tras2 = await pagina.evaluate(() => ({
+  pres: App.estado.presupuestos.length, cli: App.estado.clientes.length,
+  gas: App.estado.gastos.length, part: App.estado.partidas.length }));
+comprueba('quitarlos devuelve todo a como estaba',
+  tras2.pres === antesDemo.pres && tras2.cli === antesDemo.cli && tras2.gas === antesDemo.gas,
+  JSON.stringify({ antes: antesDemo, ahora: tras2 }));
+comprueba('el banco de precios no se toca al quitar el ejemplo', tras2.part > 0, String(tras2.part));
+// Se vuelven a cargar para las capturas y para dejar la aplicación llena
+await pagina.evaluate(() => App.ir('ajustes'));
+await pagina.waitForTimeout(300);
+await pagina.click('#aj-demo');
+await pagina.waitForTimeout(200);
+await pagina.click('.velo .modal-pie button:has-text("Cargar")');
+await pagina.waitForTimeout(600);
+
+console.log('\n15. Capturas');
 await pagina.evaluate(() => App.ir('panel'));
 await pagina.waitForTimeout(300);
 await pagina.screenshot({ path: join(salida, 'panel.png'), fullPage: true });

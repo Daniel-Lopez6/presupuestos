@@ -353,8 +353,14 @@
     }
     render(estado, p, zona);
     document.body.classList.add('imprimiendo');
+    // Un modal abierto deja overflow:hidden en la página y eso también
+    // recorta la impresión: se quita mientras dura y se devuelve después.
+    var overflowPrevio = document.body.style.overflow;
+    document.body.style.overflow = '';
     var limpiar = function () {
       document.body.classList.remove('imprimiendo');
+      document.body.style.overflow = overflowPrevio;
+      zona.innerHTML = '';
       window.removeEventListener('afterprint', limpiar);
     };
     window.addEventListener('afterprint', limpiar);

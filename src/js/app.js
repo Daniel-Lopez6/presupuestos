@@ -38,6 +38,9 @@
     estado.ajustes.emisor = Object.assign({}, base.ajustes.emisor, (estado.ajustes || {}).emisor || {});
     estado.ajustes.numeracion = Object.assign({}, base.ajustes.numeracion, (estado.ajustes || {}).numeracion || {});
     if (!Array.isArray(estado.ajustes.condiciones)) estado.ajustes.condiciones = base.ajustes.condiciones;
+    if (!Array.isArray(estado.ajustes.categoriasPrecios)) {
+      estado.ajustes.categoriasPrecios = base.ajustes.categoriasPrecios.slice();
+    }
     if (!estado.borrados || typeof estado.borrados !== 'object') estado.borrados = {};
     if (!estado.ajustes.modificado) estado.ajustes.modificado = estado.ajustes.creado || base.ajustes.creado;
     ['clientes', 'partidas', 'presupuestos', 'gastos'].forEach(function (k) {

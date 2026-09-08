@@ -75,6 +75,8 @@
       base: U.num(datos.base),
       ivaPct: datos.ivaPct === undefined ? 21 : U.num(datos.ivaPct),
       afectacion: datos.afectacion === undefined ? null : U.num(datos.afectacion),
+      ivaAfectacion: datos.ivaAfectacion === undefined || datos.ivaAfectacion === null
+        ? null : U.num(datos.ivaAfectacion),
       formaPago: datos.formaPago || 'tarjeta',
       obraId: datos.obraId || null,
       notas: datos.notas || '',
@@ -188,8 +190,19 @@
     var afectacion = (g.afectacion === null || g.afectacion === undefined)
       ? U.num(cat.irpfDeducible) : U.num(g.afectacion);
     var pctIva = U.num(cat.ivaDeducible);
-    // Si el usuario reduce la afectación, el IVA deducible no puede superarla
-    if (afectacion < pctIva) pctIva = afectacion;
+    // Normalmente, si se baja la afectación también baja el IVA que se deduce.
+    // La excepción son los casos en que la ley los separa a propósito, como el
+    // turismo: la mitad del IVA y nada en IRPF. Se reconocen porque la
+    // categoría ya trae el porcentaje de IRPF por debajo del de IVA.
+    var vanJuntos = U.num(cat.irpfDeducible) >= pctIva;
+    if (vanJuntos && afectacion < pctIva) pctIva = afectacion;
+    // Y si en el gasto se ha escrito a mano un porcentaje de IVA, manda ese.
+    // Hace falta para los casos en que la ley usa dos porcentajes distintos,
+    // como los suministros de casa: 30 % de la parte afecta en IRPF, y en IVA
+    // la proporción real de uso (criterio de la DGT desde la consulta V2554-23).
+    if (g.ivaAfectacion !== null && g.ivaAfectacion !== undefined && g.ivaAfectacion !== '') {
+      pctIva = Math.max(0, Math.min(100, U.num(g.ivaAfectacion)));
+    }
 
     return {
       base: base,

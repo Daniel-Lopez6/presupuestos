@@ -20,9 +20,9 @@
     },
     render: function (cont) {
       var todas = App.estado.partidas;
-      var categorias = {};
-      todas.forEach(function (p) { categorias[p.categoria || 'Sin categoría'] = true; });
-      var nombres = Object.keys(categorias).sort();
+      var nombres = Base.categoriasDe(App.estado);
+      var haySinCategoria = todas.some(function (p) { return !p.categoria; });
+      if (haySinCategoria) nombres = nombres.concat(['Sin categoría']);
 
       var lista = todas.filter(function (p) {
         if (categoriaActiva !== 'todas' && (p.categoria || 'Sin categoría') !== categoriaActiva) return false;
@@ -35,9 +35,22 @@
       });
 
       var chips = ['todas'].concat(nombres).map(function (n) {
+        var cuantas = n === 'todas' ? todas.length : todas.filter(function (p) {
+          return (p.categoria || 'Sin categoría') === n;
+        }).length;
         return '<button class="btn btn-s' + (categoriaActiva === n ? ' btn-pri' : '') +
-          '" data-cat="' + U.esc(n) + '">' + U.esc(n === 'todas' ? 'Todas' : n) + '</button>';
-      }).join('');
+          '" data-cat="' + U.esc(n) + '">' + U.esc(n === 'todas' ? 'Todas' : n) +
+          ' <span class="tenue" style="font-weight:600">' + cuantas + '</span></button>';
+      }).join('') +
+      '<button class="btn btn-s" id="cat-nueva" title="Crear una categoría">' +
+        UI.ic('mas', 14) + '<span>Categoría</span></button>' +
+      (categoriaActiva !== 'todas' && categoriaActiva !== 'Sin categoría'
+        ? '<span class="tenue" style="margin:0 2px">·</span>' +
+          '<button class="btn btn-s btn-plano" id="cat-renombrar" title="Cambiar el nombre">' +
+            UI.ic('lapiz', 14) + '</button>' +
+          '<button class="btn btn-s btn-plano" id="cat-borrar" title="Borrar la categoría">' +
+            UI.ic('papelera', 14) + '</button>'
+        : '');
 
       var filas = lista.map(function (p) {
         return '<tr class="fila-click" data-par="' + p.id + '">' +
@@ -83,6 +96,9 @@
       cont.querySelectorAll('[data-cat]').forEach(function (b) {
         b.addEventListener('click', function () { categoriaActiva = b.dataset.cat; App.refrescar(); });
       });
+      enlaza('cat-nueva', nuevaCategoria);
+      enlaza('cat-renombrar', function () { renombraCategoria(categoriaActiva); });
+      enlaza('cat-borrar', function () { borraCategoria(categoriaActiva); });
       cont.querySelectorAll('[data-par]').forEach(function (f) {
         f.addEventListener('click', function (e) {
           if (e.target.closest('button')) return;
@@ -95,10 +111,119 @@
     }
   };
 
+  function enlaza(id, fn) {
+    var n = document.getElementById(id);
+    if (n) n.addEventListener('click', fn);
+  }
+
+  function guardaCategorias(lista) {
+    App.estado.ajustes.categoriasPrecios = lista;
+    App.tocar(App.estado.ajustes);
+    return App.guardar();
+  }
+
+  function nuevaCategoria() {
+    UI.modal({
+      titulo: 'Nueva categoría',
+      cuerpo: UI.campo({ etiqueta: 'Nombre', nombre: 'cat', placeholder: 'Fontanería',
+        ayuda: 'Sirve para tener el banco de precios ordenado por oficios o por zonas de la obra.' }),
+      botones: [
+        { texto: 'Cancelar' },
+        { texto: 'Crear', clase: 'btn-pri', icono: 'mas', accion: function (m) {
+          var nombre = (UI.valores(m.cuerpo).cat || '').trim();
+          if (!nombre) { UI.aviso('Ponle un nombre', 'err'); return false; }
+          var actuales = Base.categoriasDe(App.estado);
+          if (actuales.some(function (c) { return U.normaliza(c) === U.normaliza(nombre); })) {
+            UI.aviso('Ya tienes una categoría con ese nombre', 'err');
+            return false;
+          }
+          guardaCategorias(actuales.concat([nombre]));
+          categoriaActiva = nombre;
+          App.refrescar();
+          UI.aviso('Categoría creada', 'ok');
+        } }
+      ]
+    });
+  }
+
+  function renombraCategoria(vieja) {
+    UI.modal({
+      titulo: 'Cambiar el nombre',
+      cuerpo: UI.campo({ etiqueta: 'Nombre', nombre: 'cat', valor: vieja,
+        ayuda: 'Se cambia también en todas las partidas que la tengan.' }),
+      botones: [
+        { texto: 'Cancelar' },
+        { texto: 'Guardar', clase: 'btn-pri', icono: 'guardar', accion: function (m) {
+          var nombre = (UI.valores(m.cuerpo).cat || '').trim();
+          if (!nombre) { UI.aviso('Ponle un nombre', 'err'); return false; }
+          if (nombre === vieja) return;
+          App.estado.partidas.forEach(function (p) {
+            if (p.categoria === vieja) { p.categoria = nombre; App.tocar(p); }
+          });
+          guardaCategorias(Base.categoriasDe(App.estado)
+            .filter(function (c) { return c !== vieja; }).concat([nombre]));
+          categoriaActiva = nombre;
+          App.refrescar();
+          UI.aviso('Categoría renombrada', 'ok');
+        } }
+      ]
+    });
+  }
+
+  function borraCategoria(nombre) {
+    var dentro = App.estado.partidas.filter(function (p) { return p.categoria === nombre; });
+
+    function quitaDeAjustes() {
+      return guardaCategorias(Base.categoriasDe(App.estado).filter(function (c) { return c !== nombre; }));
+    }
+
+    if (!dentro.length) {
+      return UI.confirmar({
+        titulo: 'Borrar la categoría',
+        html: 'La categoría <b>' + U.esc(nombre) + '</b> está vacía, así que no se pierde ninguna partida.',
+        aceptar: 'Borrar', peligro: true
+      }).then(function (si) {
+        if (!si) return;
+        quitaDeAjustes();
+        categoriaActiva = 'todas';
+        App.refrescar();
+        UI.aviso('Categoría borrada', 'ok');
+      });
+    }
+
+    UI.modal({
+      titulo: 'Borrar la categoría',
+      cuerpo: '<p style="margin-top:0">En <b>' + U.esc(nombre) + '</b> tienes <b>' + dentro.length +
+        (dentro.length === 1 ? '</b> partida.' : '</b> partidas.') + ' ¿Qué hago con ellas?</p>' +
+        '<div class="aviso aviso-oro" style="margin-bottom:0">' + UI.ic('aviso', 15) +
+        '<div>Si las conservas, se quedan en el banco de precios sin categoría y las ' +
+        'puedes recolocar cuando quieras.</div></div>',
+      sinFoco: true,
+      botones: [
+        { texto: 'Cancelar' },
+        { texto: 'Conservar las partidas', accion: function () {
+          dentro.forEach(function (p) { p.categoria = ''; App.tocar(p); });
+          quitaDeAjustes();
+          categoriaActiva = 'todas';
+          App.refrescar();
+          UI.aviso('Categoría borrada, partidas conservadas', 'ok');
+        } },
+        { texto: 'Borrar también las partidas', clase: 'btn-peligro', accion: function () {
+          dentro.forEach(function (p) {
+            App.estado.partidas = App.estado.partidas.filter(function (x) { return x.id !== p.id; });
+            global.Fusion.anotaBorrado(App.estado, p.id);
+          });
+          quitaDeAjustes();
+          categoriaActiva = 'todas';
+          App.refrescar();
+          UI.aviso('Categoría y partidas borradas', 'ok');
+        } }
+      ]
+    });
+  }
+
   function categoriasExistentes() {
-    var s = {};
-    App.estado.partidas.forEach(function (p) { if (p.categoria) s[p.categoria] = true; });
-    return Object.keys(s).sort();
+    return Base.categoriasDe(App.estado);
   }
 
   function formulario(partida) {

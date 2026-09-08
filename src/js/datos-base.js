@@ -100,9 +100,9 @@
   ];
 
   var TIPOS_IRPF = [
-    { valor: 0,  nombre: 'Sin retención — cliente particular' },
-    { valor: 15, nombre: '15 % — cliente empresa o profesional' },
-    { valor: 7,  nombre: '7 % — nuevo autónomo (año de alta y dos siguientes)' }
+    { valor: 0,  nombre: 'Sin retención — lo normal en obras y reformas' },
+    { valor: 15, nombre: '15 % — actividad profesional con cliente empresa' },
+    { valor: 7,  nombre: '7 % — actividad profesional recién dada de alta' }
   ];
 
   /* Categorías de gasto deducible para un autónomo en estimación directa.
@@ -117,7 +117,7 @@
       nota: 'Trabajos ejecutados por terceros. Guarda la factura del subcontratista con su NIF.' },
     { id: 'herramienta', nombre: 'Herramienta y pequeño material', grupo: 'Obra',
       ivaDeducible: 100, irpfDeducible: 100,
-      nota: 'Herramienta de menos de 300 € por unidad se puede llevar directamente a gasto. Por encima, va a amortización.' },
+      nota: 'Lo que cueste menos de 300 € por pieza va directo a gasto del año, hasta 25.000 € anuales entre todo. Lo que pase de 300 € se reparte en varios años como amortización.' },
     { id: 'epi', nombre: 'EPI y ropa de trabajo', grupo: 'Obra',
       ivaDeducible: 100, irpfDeducible: 100,
       nota: 'Ropa con anagrama, calzado de seguridad, guantes, cascos. La ropa de calle no es deducible.' },
@@ -128,12 +128,18 @@
       ivaDeducible: 100, irpfDeducible: 100,
       nota: 'Tasas de vertedero y retirada de escombros vinculadas a la obra.' },
 
-    { id: 'vehiculo_comb', nombre: 'Vehículo: combustible y peajes', grupo: 'Vehículo',
-      ivaDeducible: 50, irpfDeducible: 50,
-      nota: 'En turismos, Hacienda presume un 50 % de afectación. En furgoneta industrial se puede defender el 100 %, pero hay que poder probarlo.' },
-    { id: 'vehiculo_mant', nombre: 'Vehículo: mantenimiento, seguro e ITV', grupo: 'Vehículo',
-      ivaDeducible: 50, irpfDeducible: 50,
-      nota: 'Mismo criterio de afectación que el combustible. El seguro no lleva IVA.' },
+    { id: 'furgoneta_comb', nombre: 'Furgoneta de trabajo: combustible y peajes', grupo: 'Vehículo',
+      ivaDeducible: 100, irpfDeducible: 100,
+      nota: 'Una furgoneta o vehículo mixto para transportar material se deduce entera, IVA e IRPF. Hay que poder demostrarlo: rotulada, y con otro coche para lo personal.' },
+    { id: 'furgoneta_mant', nombre: 'Furgoneta de trabajo: mantenimiento, seguro e ITV', grupo: 'Vehículo',
+      ivaDeducible: 100, irpfDeducible: 100,
+      nota: 'Mismo criterio que su combustible. El seguro no lleva IVA.' },
+    { id: 'vehiculo_comb', nombre: 'Coche particular: combustible y peajes', grupo: 'Vehículo',
+      ivaDeducible: 50, irpfDeducible: 0,
+      nota: 'Ojo, no es lo mismo en los dos impuestos. El IVA se deduce al 50 %, que es lo que Hacienda presume en un turismo. En IRPF no se deduce nada: un turismo no admite estar afecto a medias, o es solo de trabajo o no cuenta.' },
+    { id: 'vehiculo_mant', nombre: 'Coche particular: mantenimiento, seguro e ITV', grupo: 'Vehículo',
+      ivaDeducible: 50, irpfDeducible: 0,
+      nota: 'Mismo criterio que su combustible: la mitad del IVA, nada en IRPF. El seguro no lleva IVA.' },
 
     { id: 'suministros_local', nombre: 'Suministros del local (luz, agua, gas)', grupo: 'Local',
       ivaDeducible: 100, irpfDeducible: 100,
@@ -141,9 +147,9 @@
     { id: 'alquiler_local', nombre: 'Alquiler de local o nave', grupo: 'Local',
       ivaDeducible: 100, irpfDeducible: 100,
       nota: 'Si el arrendador es empresa o profesional, la factura lleva IVA y puede llevar retención de IRPF.' },
-    { id: 'suministros_casa', nombre: 'Suministros del domicilio afecto', grupo: 'Local',
-      ivaDeducible: 0, irpfDeducible: 30,
-      nota: 'Se deduce el 30 % de la parte proporcional de la vivienda declarada como afecta. El IVA de estos suministros no es deducible.' },
+    { id: 'suministros_casa', nombre: 'Suministros de casa, si trabajas allí', grupo: 'Local',
+      ivaDeducible: 0, irpfDeducible: 0,
+      nota: 'Van dos porcentajes distintos y no se parecen. En IRPF se deduce el 30 % de la parte de la casa que tengas declarada como despacho en el modelo 036: si tienes afecto el 20 % de la vivienda, escribe 6 en Afectación (el 30 % de 20). En IVA, desde 2023 Hacienda admite deducir la proporción de uso real, así que en ese ejemplo escribirías 20 en IVA deducible. Sin haberlo declarado en el 036 no se deduce nada, y el móvil no entra aquí.' },
 
     { id: 'cuota_reta', nombre: 'Cuota de autónomos (RETA)', grupo: 'Estructura',
       ivaDeducible: 0, irpfDeducible: 100,
@@ -171,7 +177,7 @@
       nota: 'Debe estar relacionada con la actividad. Los cursos de formación reglada suelen ir exentos de IVA.' },
     { id: 'dietas', nombre: 'Dietas y manutención', grupo: 'Estructura',
       ivaDeducible: 0, irpfDeducible: 100,
-      nota: 'Máximo 26,67 € por día en España sin pernocta. Obligatorio pagar con tarjeta o transferencia y que sea en día laborable fuera del municipio.' },
+      nota: 'Como mucho 26,67 € al día en España si vuelves a dormir a casa, o 53,34 € si te quedas a dormir fuera. Tiene que ser día de trabajo, fuera de tu municipio, y pagado con tarjeta o transferencia: en efectivo no vale.' },
     { id: 'amortizacion', nombre: 'Amortización de bienes de inversión', grupo: 'Estructura',
       ivaDeducible: 0, irpfDeducible: 100,
       nota: 'Reparto anual del coste de vehículos, maquinaria grande y equipos. El IVA se dedujo en la compra, no aquí.' },
@@ -230,6 +236,10 @@
       condiciones: CONDICIONES.slice(),
       textoPie: '',
       mostrarCodigos: false,
+      // Las agrupaciones del banco de precios. Vienen unas de ejemplo y cada
+      // uno se hace las suyas: fontanería, electricidad, lo que trabaje.
+      categoriasPrecios: ['Albañilería', 'Auxiliares', 'Demolición', 'Instalaciones',
+                          'Mano de obra', 'Pintura', 'Pladur'],
       colorPrincipal: '#16233A',
       colorAcento: '#B08D57',
       creado: null,
@@ -292,6 +302,18 @@
     estado: function (id) {
       for (var i = 0; i < ESTADOS.length; i++) if (ESTADOS[i].id === id) return ESTADOS[i];
       return ESTADOS[0];
+    },
+    // La lista buena es la de ajustes más las que ya usen las partidas: así
+    // ninguna categoría desaparece por un cruce de sincronización.
+    categoriasDe: function (estado) {
+      var vistas = {};
+      ((estado.ajustes || {}).categoriasPrecios || []).forEach(function (c) {
+        if (c && c.trim()) vistas[c.trim()] = true;
+      });
+      (estado.partidas || []).forEach(function (p) {
+        if (p.categoria && p.categoria.trim()) vistas[p.categoria.trim()] = true;
+      });
+      return Object.keys(vistas).sort(function (a, b) { return a.localeCompare(b, 'es'); });
     }
   };
 })(window);

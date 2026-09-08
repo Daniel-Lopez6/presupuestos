@@ -557,7 +557,16 @@ select { appearance: none; background-image: url("data:image/svg+xml;charset=utf
 .barra-progreso { height: 6px; background: var(--linea-2); border-radius: 4px; overflow: hidden; }
 .barra-progreso i { display: block; height: 100%; background: var(--oro); border-radius: 4px; }
 
-#zona-impresion { display: none; }
+/* Fuera de la vista, pero NO con display:none: la paginación del documento
+   funciona midiendo alturas, y lo que está oculto del todo mide cero, así que
+   todo acabaría metido en una sola hoja. */
+#zona-impresion {
+  position: absolute;
+  left: -20000px;
+  top: 0;
+  width: 210mm;
+  pointer-events: none;
+}
 
 /* --- Pantallas de bienvenida -------------------------------------------- */
 

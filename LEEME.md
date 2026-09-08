@@ -27,6 +27,12 @@ Después, un rato tranquilo en **Precios**: ajusta a los tuyos las veinte
 partidas de reforma que vienen de ejemplo. Es lo que más tiempo te va a
 ahorrar luego.
 
+Las partidas van agrupadas en categorías (Albañilería, Pintura, Mano de
+obra…). Puedes crear las tuyas con **+ Categoría** y borrar las que no uses:
+al elegir una categoría te salen al lado el lápiz para cambiarle el nombre y
+la papelera para borrarla. Si la borras te pregunta qué hacer con sus
+partidas, así que no se pierde nada sin avisar.
+
 Si te saltaste el asistente o quieres repetirlo: **Ajustes** → *Repetir la
 puesta en marcha*.
 
@@ -36,9 +42,14 @@ puesta en marcha*.
 2. *Objeto del presupuesto*: una o dos frases que resuman la obra.
 3. Añade partidas con **Del banco de precios** (rápido) o con **Partida** para
    escribirla a mano. **Capítulo** crea una separación tipo "Baño", "Cocina".
-4. Elige el IVA. En reformas de vivienda con más de dos años suele ser el 10 %;
-   en local u obra nueva, el 21 %.
-5. Retención de IRPF solo si el cliente es empresa o profesional.
+4. Elige el IVA. El 10 % pide tres cosas a la vez: que el cliente sea un
+   particular o una comunidad de vecinos, que la vivienda tenga más de dos
+   años, y que el material que pongas tú no pase del 40 % del importe sin IVA.
+   Si falla cualquiera de las tres, va al 21 %. En local de negocio y en obra
+   nueva, siempre el 21 %.
+5. Retención de IRPF: en obras y reformas se deja en cero. La retención la
+   llevan las actividades profesionales (un arquitecto, un abogado), no las
+   empresariales. Si tu gestor te dice otra cosa, ahí tienes las opciones.
 6. **Imprimir / PDF** → en el cuadro de impresión elige *Guardar como PDF*.
 
 ## Estados
@@ -51,8 +62,18 @@ a punto de caducar. Cuando el cliente responda, márcalo **Aceptado** o
 ## Gastos
 
 Apunta cada factura de gasto en **Gastos**: fecha, proveedor, base e IVA. La
-categoría decide qué parte es deducible; el combustible del turismo, por
-ejemplo, entra al 50 % porque es lo que admite Hacienda por defecto.
+categoría decide qué parte es deducible y te lo explica debajo mientras la
+eliges.
+
+Ojo con el vehículo, que es donde más se equivoca la gente: una furgoneta de
+trabajo se deduce entera en los dos impuestos, pero un coche particular solo
+admite la mitad del IVA y **nada** en IRPF, porque un turismo no puede estar
+afecto a medias. Por eso hay dos categorías distintas.
+
+Las dos casillas del final son para los casos raros. **Afectación** es el
+porcentaje del gasto que va a IRPF, y **IVA deducible** el del IVA, cuando la
+ley usa dos números distintos. Déjalas en blanco y se aplica lo normal de cada
+categoría.
 
 Al final del trimestre, **Exportar para la gestoría** te da un CSV con todo
 ordenado.
@@ -94,15 +115,53 @@ Si algún día sincroniza algo que no esperabas, en Ajustes tienes *Deshacer la
 Esto solo funciona en la versión web. El archivo `Presupuestos.html` del
 escritorio va por su cuenta.
 
-## Copias de seguridad
+## Datos de ejemplo, para trastear sin miedo
 
-Aunque tengas Drive conectado, conviene una copia propia de vez en cuando:
-**Ajustes** → *Descargar copia*. Se guarda un archivo `.json` que puedes
-mandarte por correo o dejar en un pendrive. Ese mismo archivo sirve para
-llevártelo a otro ordenador con *Restaurar copia*.
+En **Ajustes** → *Cargar datos de ejemplo* se llena la aplicación con un año
+de trabajo inventado: clientes, presupuestos en todos los estados y el libro
+de gastos con sus facturas. Sirve para ver cómo queda todo funcionando y para
+enredar sin estropear nada.
 
-Si no usas la sincronización, esto no es opcional: los datos viven solo en
-ese dispositivo y si se estropea, se pierden.
+Cuando quieras empezar en serio, el mismo botón pone *Quitar los datos de
+ejemplo* y los borra. Solo se lleva lo inventado: lo que hayas metido tú se
+queda, y el banco de precios tampoco se toca.
+
+## Dónde se guardan los datos y cómo hacer copias
+
+Los datos se guardan **dentro del navegador de ese dispositivo**, en su propio
+almacén. No es un archivo que puedas ver en tus carpetas, y no viaja a ningún
+sitio salvo que conectes Drive.
+
+Ahí se quedan indefinidamente: no caducan, no se borran al cerrar el navegador
+ni al apagar el ordenador. Lo que sí los borra:
+
+- Borrar los datos de navegación eligiendo *cookies y datos de sitios*
+  (limpiar solo el historial o la caché no les afecta).
+- Usar la aplicación en una ventana de incógnito: ahí todo desaparece al
+  cerrarla.
+- Desinstalar el navegador, o formatear o perder el dispositivo.
+- En el iPhone hay un extra: si pasas mucho tiempo sin abrir la aplicación,
+  Safari puede limpiarle el almacén por su cuenta. Abrirla de vez en cuando
+  reinicia esa cuenta atrás, pero la garantía de verdad es tener una copia
+  descargada o Drive conectado.
+
+Por eso, **Ajustes** → *Descargar copia*: baja un archivo `.json` con todo lo
+que tengas en ese momento. Guárdalo donde guardes las cosas importantes: el
+correo, un pendrive, la carpeta del ordenador. La aplicación te avisa en el
+Panel si llevas mucho sin descargar una.
+
+Para recuperarla, en el otro dispositivo o en el mismo: **Ajustes** →
+*Restaurar copia*, eliges el archivo y te pregunta qué hacer:
+
+- **Juntar** deja lo que ya tienes y añade lo que traiga la copia. Es lo
+  normal cuando pasas los datos del ordenador al móvil.
+- **Reemplazar** borra todo lo de ahora y deja solo lo de la copia. Es lo que
+  quieres si algo se ha estropeado y vuelves a un punto bueno.
+
+Con Drive conectado esto va solo, pero la copia descargada sigue mereciendo la
+pena de vez en cuando: es la única que no depende de que Google ni el
+navegador hagan bien su trabajo. Y si **no** usas la sincronización, no es
+opcional: los datos viven solo en ese dispositivo.
 
 ## Si algo va mal
 
