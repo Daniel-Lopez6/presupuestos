@@ -320,6 +320,11 @@
 
   function avisosDeArranque() {
     var info = Store.info();
+    // La primera vez manda el asistente: nada de avisos encima.
+    if (info.fiable && global.Bienvenida && global.Bienvenida.haceFalta()) {
+      global.Bienvenida.abrir();
+      return;
+    }
     if (!info.fiable) {
       UI.modal({
         titulo: 'No se pueden guardar los datos',

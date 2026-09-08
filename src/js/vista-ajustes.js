@@ -159,6 +159,14 @@
         '<div class="ayuda" style="margin-top:10px">Guarda la copia en el móvil, en un pendrive o en el correo. ' +
           'Es la forma de pasar los datos a otro dispositivo y de no perder nada si se estropea este.</div>' +
         '<div class="linea-sep"></div>' +
+        '<div class="flex" style="gap:8px;flex-wrap:wrap">' +
+          '<button class="btn" id="aj-asistente">' + UI.ic('bombilla', 15) +
+            '<span>Repetir la puesta en marcha</span></button>' +
+          (global.Bienvenida && global.Bienvenida.sePuedeInstalar()
+            ? '<button class="btn" id="aj-instalar">' + UI.ic('descarga', 15) +
+              '<span>Instalar en este dispositivo</span></button>' : '') +
+        '</div>' +
+        '<div class="linea-sep"></div>' +
         '<button class="btn btn-peligro" id="aj-reset">' + UI.ic('papelera', 15) + '<span>Empezar de cero</span></button>' +
       '</div></div>';
   }
@@ -330,6 +338,27 @@
           UI.aviso('Aplicación reiniciada', 'ok');
         });
       });
+    });
+
+    boton('aj-asistente', function () {
+      if (!global.Bienvenida) return;
+      App.estado.ajustes.bienvenidaVista = false;
+      global.Bienvenida.abrir(function () { App.refrescar(); });
+    });
+
+    boton('aj-instalar', function () {
+      if (!global.Bienvenida) return;
+      if (global.Bienvenida.esApple()) {
+        return UI.modal({
+          titulo: 'Añadir a la pantalla de inicio',
+          cuerpo: '<ol style="padding-left:20px;line-height:1.9;margin:0">' +
+            '<li>Toca el botón <b>Compartir</b>, el cuadrado con la flecha hacia arriba.</li>' +
+            '<li>Baja y elige <b>Añadir a pantalla de inicio</b>.</li>' +
+            '<li>Toca <b>Añadir</b>.</li></ol>',
+          botones: [{ texto: 'Entendido', clase: 'btn-pri' }]
+        });
+      }
+      global.Bienvenida.instalar().then(function () { App.refrescar(); });
     });
 
     conectaSync();

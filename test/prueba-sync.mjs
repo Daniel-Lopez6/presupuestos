@@ -60,6 +60,13 @@ async function abreDispositivo(nombre) {
   await pagina.exposeFunction('nubeEscribir', async (texto) => { nube = texto; escrituras++; return true; });
   await pagina.goto('http://localhost:8127/');
   await pagina.waitForFunction(() => window.App && window.App.listo);
+  // El asistente de la primera vez se prueba aparte; aquí estorba
+  await pagina.evaluate(() => {
+    App.estado.ajustes.bienvenidaVista = true;
+    document.querySelectorAll('.velo').forEach(v => v.remove());
+    document.body.style.overflow = '';
+    return App.guardarYa();
+  });
   await pagina.evaluate(() => {
     window.Sync.usarRemoto({
       nombre: 'prueba',

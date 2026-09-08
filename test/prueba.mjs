@@ -51,9 +51,36 @@ pagina.on('console', m => { if (m.type() === 'error' && !externo(m.text())) erro
 
 await pagina.goto('http://localhost:8123/');
 await pagina.waitForFunction(() => window.App && window.App.listo);
+await pagina.waitForTimeout(200);
 
-console.log('\n1. Arranque');
+console.log('\n1. Arranque y puesta en marcha');
 comprueba('la aplicación arranca sin errores', erroresConsola.length === 0, erroresConsola.join(' | '));
+
+// El asistente de la primera vez: es lo primero que verá el usuario final
+comprueba('la primera vez sale el asistente',
+  (await pagina.locator('.bienvenida').count()) === 1);
+comprueba('el asistente empieza por la presentación',
+  /Tus presupuestos, en orden/.test(await pagina.textContent('.bienvenida')));
+await pagina.click('.bienvenida [data-siguiente]');
+await pagina.waitForTimeout(120);
+comprueba('el segundo paso pide los datos del emisor',
+  (await pagina.locator('.bienvenida [name=b_nif]').count()) === 1);
+await pagina.fill('.bienvenida [name=b_nif]', '12345678z');
+await pagina.click('.bienvenida [data-guardar-datos]');
+await pagina.waitForTimeout(150);
+comprueba('el NIF escrito en el asistente queda guardado en mayúsculas',
+  (await pagina.evaluate(() => App.estado.ajustes.emisor.nif)) === '12345678Z',
+  await pagina.evaluate(() => App.estado.ajustes.emisor.nif));
+// Se recorre lo que quede y se cierra
+for (let i = 0; i < 4; i++) {
+  const n = await pagina.locator('.bienvenida [data-siguiente], .bienvenida [data-cerrar]').count();
+  if (!n) break;
+  await pagina.locator('.bienvenida [data-siguiente], .bienvenida [data-cerrar]').first().click();
+  await pagina.waitForTimeout(120);
+}
+comprueba('el asistente se cierra al terminar', (await pagina.locator('.bienvenida').count()) === 0);
+comprueba('no vuelve a salir en el siguiente arranque',
+  (await pagina.evaluate(() => App.estado.ajustes.bienvenidaVista)) === true);
 comprueba('hay banco de precios precargado', await pagina.evaluate(() => App.estado.partidas.length) === 20);
 comprueba('el emisor está configurado',
   (await pagina.evaluate(() => App.estado.ajustes.emisor.nombre)) === 'Jose Angel Dominguez Ramos');
