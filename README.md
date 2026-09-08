@@ -76,17 +76,22 @@ que apunte a esa dirección.
 
 ### 1. Publicar la aplicación
 
-Sube el contenido de `dist/web/` a cualquier alojamiento estático gratuito.
-Con GitHub Pages:
+El proyecto ya es un repositorio git con el flujo de trabajo de GitHub Pages
+listo en `.github/workflows/pages.yml`: compila y publica solo en cada push.
+Crea un repositorio vacío en GitHub llamado `presupuestos` y desde esta
+carpeta:
 
-1. Crea un repositorio nuevo, por ejemplo `presupuestos`.
-2. Sube ahí lo que hay dentro de `dist/web/` (que el `index.html` quede en la
-   raíz del repositorio).
-3. Settings → Pages → Source: `Deploy from a branch`, rama `main`, carpeta `/`.
-4. A los dos minutos tendrás `https://TUUSUARIO.github.io/presupuestos/`.
+```bash
+git remote add origin https://github.com/TUUSUARIO/presupuestos.git
+git push -u origin main
+```
 
-Cloudflare Pages y Netlify valen igual. Lo único que importa es que la
-dirección sea `https` y no cambie.
+Después, una sola vez: Settings → Pages → Source: **GitHub Actions**. A los
+dos minutos tendrás `https://TUUSUARIO.github.io/presupuestos/`.
+
+Cloudflare Pages y Netlify valen igual (carpeta de salida `dist/web`, orden de
+compilación `node build.mjs`). Lo único que importa es que la dirección sea
+`https` y no cambie.
 
 ### 2. Crear el ID de cliente de Google
 
@@ -115,12 +120,30 @@ misma cuenta de Google en todos. Los datos van a la carpeta privada de
 aplicaciones de ese Drive: no se ve entre sus archivos, no ocupa cuota
 visible y solo la lee esta aplicación.
 
+### 4. Instalarla en cada dispositivo
+
+Esta es la parte que evita el lío de tener dos apps distintas. Una vez
+publicada, la dirección web **es** la aplicación, también en el ordenador:
+
+- **PC (Chrome o Edge)**: abre la dirección → icono de instalar en la barra de
+  direcciones, o menú → *Instalar aplicación*. Queda con su icono en el
+  escritorio y se abre en ventana propia, sin barra de navegador. Funciona sin
+  internet gracias al service worker.
+- **Android**: menú → *Instalar aplicación*.
+- **iPhone**: Compartir → *Añadir a pantalla de inicio*.
+
 ### Qué no sincroniza
 
-El archivo `Presupuestos.html` del escritorio, porque Google no autoriza
-orígenes `file://`. Ese archivo queda como copia offline de emergencia y se
-mueve con las copias de seguridad. La copia publicada como artefacto de
-Claude tampoco: su política de seguridad bloquea los scripts de Google.
+`dist/Presupuestos.html`, el archivo de un solo trozo, porque Google no
+autoriza orígenes `file://` y nunca lo hará. No es la aplicación: es una
+copia de emergencia para tenerla en un pendrive o para trabajar en un equipo
+donde no se pueda instalar nada. Si se usa la versión publicada, ese archivo
+no debe estar en el escritorio de nadie, porque llevaría a tener dos juegos
+de datos distintos.
+
+La copia publicada como artefacto de Claude tampoco sincroniza: su política de
+seguridad bloquea los scripts de Google. Vale para enseñar la app, no para
+usarla en serio.
 
 ## Decisiones de diseño
 
