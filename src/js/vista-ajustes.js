@@ -130,6 +130,18 @@
       '</div></div>';
   }
 
+  // Cada copia de la aplicación guarda sus propios datos. Decirlo evita el
+  // susto de "he guardado un cliente y ya no está": estaba en la otra copia.
+  function dondeEstoy() {
+    if (location.protocol === 'file:') {
+      return 'Estás en la <b>copia de escritorio</b>, el archivo Presupuestos.html.';
+    }
+    if (global.claude && typeof global.claude.use === 'function') {
+      return 'Estás en la <b>copia publicada dentro de Claude</b>.';
+    }
+    return 'Estás en la <b>versión de internet</b>: ' + U.esc(location.host) + '.';
+  }
+
   function tarjetaDatos(info) {
     var dias = App.diasSinCopia();
     var e = App.estado;
@@ -144,6 +156,10 @@
                   : 'No se envían a ninguna parte ni los ve nadie más.')
               : 'Ábrela en una ventana normal del navegador, no de incógnito.') +
           '</div></div>' +
+        '<div class="aviso aviso-info">' + UI.ic('info', 16) +
+          '<div>' + dondeEstoy() + ' Si abres la aplicación desde otro sitio, ' +
+          'esa copia lleva sus propios datos: no verás aquí lo que guardes allí. ' +
+          'Para pasarlos de una a otra, usa la copia de seguridad de aquí abajo.</div></div>' +
         '<div class="rejilla rej-2" style="gap:10px;margin-bottom:16px">' +
           mini('Presupuestos', e.presupuestos.length) +
           mini('Clientes', e.clientes.length) +
