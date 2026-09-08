@@ -7,6 +7,6 @@
   "scripts": {
     "build": "node build.mjs",
     "start": "node servidor.mjs",
-    "test": "node test/prueba.mjs && node test/prueba-sync.mjs"
+    "test": "node test/privacidad.mjs && node test/prueba.mjs && node test/prueba-sync.mjs"
   }
 }

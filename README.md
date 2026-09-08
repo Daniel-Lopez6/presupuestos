@@ -6,6 +6,11 @@ propio y sin conexión. Los datos viven en el dispositivo; si se activa la
 sincronización, además se ponen de acuerdo entre el ordenador y el móvil a
 través del Google Drive del propio usuario.
 
+El código no contiene los datos de ningún usuario: nombre, NIF, dirección,
+teléfono y correo los escribe cada uno la primera vez que la abre, y el
+logotipo se dibuja solo a partir de ese nombre. Por eso el repositorio puede
+ser público sin exponer a nadie.
+
 ## Qué hace
 
 - **Presupuestos** con capítulos, partidas, descuentos por línea y descuento
@@ -49,6 +54,7 @@ presupuestos-app/
 │   │   └── documento.css  hoja A4 y reglas de impresión
 │   └── js/
 │       ├── config.js      el ID de cliente de Google, lo único a rellenar
+│       ├── bienvenida.js  asistente de la primera vez e instalación
 │       ├── util.js        formato de moneda y fechas, NIF, descargas
 │       ├── store.js       persistencia (IndexedDB con reserva localStorage)
 │       ├── datos-base.js  valores por defecto, categorías, logotipo
@@ -60,7 +66,8 @@ presupuestos-app/
 │       ├── app.js         estado global, navegación, copias
 │       └── vista-*.js     una por pantalla
 ├── test/
-│   ├── prueba.mjs         47 comprobaciones de la aplicación
+│   ├── privacidad.mjs     13 comprobaciones, sin navegador
+│   ├── prueba.mjs         55 comprobaciones de la aplicación
 │   └── prueba-sync.mjs    26 comprobaciones de la sincronización
 └── dist/
     ├── Presupuestos.html  archivo único, doble clic, sin conexión
@@ -147,6 +154,15 @@ usarla en serio.
 
 ## Decisiones de diseño
 
+**Ningún dato personal dentro del código.** El repositorio y la página son
+públicos —GitHub Pages solo publica desde repositorios públicos en el plan
+gratuito—, así que los valores de fábrica del emisor están vacíos y los pide
+el asistente de la primera vez. El logotipo tampoco está dibujado a mano: se
+genera con las iniciales y el nombre que escriba cada uno, en el mismo estilo.
+`test/privacidad.mjs` rastrea `src/` en busca de correos, teléfonos y
+direcciones, y comprueba que los valores de fábrica sigan en blanco: si alguien
+vuelve a meter datos ahí, la tanda falla.
+
 **Sin framework y con scripts clásicos.** No hay módulos ES, y es a propósito:
 Chrome bloquea `import` en el protocolo `file://`, y el objetivo era que el
 archivo compilado se abra con doble clic. Cada archivo se expone en un objeto
@@ -200,6 +216,8 @@ y al documento exportado.
 ```bash
 node servidor.mjs           # http://localhost:8080 sobre src/
 node build.mjs              # genera dist/
+npm test                    # las tres tandas seguidas
+node test/privacidad.mjs    # sin navegador, rápida
 node test/prueba.mjs        # requiere playwright instalado
 node test/prueba-sync.mjs   # dos navegadores contra un Drive de mentira
 ```

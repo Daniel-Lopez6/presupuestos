@@ -93,11 +93,11 @@ console.log('\n1. Primera subida desde el ordenador');
 const idP1 = await mira(pc, () => {
   const p = Modelo.nuevoPresupuesto(App.estado);
   Modelo.consumeNumero(App.estado);
-  p.cliente.nombre = 'ADINCO S.L.';
+  p.cliente.nombre = 'Construcciones Miralbueno S.L.';
   p.objeto = 'Reparación de techo';
   p.lineas.push(Modelo.nuevaLinea({ descripcion: 'Pintura', unidad: 'm²', cantidad: 45, precio: 8.5 }));
   App.estado.presupuestos.push(p);
-  App.estado.clientes.push(Modelo.nuevoCliente({ nombre: 'ADINCO S.L.', nif: 'B86745231' }));
+  App.estado.clientes.push(Modelo.nuevoCliente({ nombre: 'Construcciones Miralbueno S.L.', nif: 'B99999999' }));
   return App.guardarYa().then(() => p.id);
 });
 await conecta(pc);

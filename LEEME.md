@@ -12,15 +12,21 @@ Tienes dos formas y las dos valen:
 Consejo: en la versión web, menú del navegador → *Instalar aplicación*, y te
 queda con su icono en el escritorio como cualquier otro programa.
 
-## Los primeros cinco minutos
+## La primera vez
 
-1. **Ajustes** → revisa nombre, dirección, teléfono y correo. Añade el NIF: un
-   presupuesto sin NIF queda cojo.
-2. **Ajustes** → sube el logotipo si tienes el archivo original. Si no, se usa
-   el que trae la aplicación.
-3. **Precios** → ajusta los precios a los tuyos. Vienen veinte partidas
-   habituales de reforma como punto de partida.
-4. **Panel** → *Nuevo presupuesto*.
+Al abrirla te lleva de la mano: te pide tus datos, te ofrece conectar tu Google
+para que el móvil y el ordenador vayan juntos, y te la instala. Dos minutos.
+
+Con lo que escribas se dibuja tu logotipo: tus iniciales dentro del arco y tu
+nombre debajo. Si tienes el logotipo en un archivo, en **Ajustes** puedes subir
+el tuyo y sustituirlo.
+
+Después, un rato tranquilo en **Precios**: ajusta a los tuyos las veinte
+partidas de reforma que vienen de ejemplo. Es lo que más tiempo te va a
+ahorrar luego.
+
+Si te saltaste el asistente o quieres repetirlo: **Ajustes** → *Repetir la
+puesta en marcha*.
 
 ## Hacer un presupuesto
 

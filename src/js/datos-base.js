@@ -5,18 +5,74 @@
 (function (global) {
   'use strict';
 
-  var LOGO_SVG =
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 148" width="320" height="148" role="img" aria-label="Logotipo">' +
+  /* El logotipo se dibuja a partir del nombre que ponga cada uno: las
+     iniciales dentro del arco y el nombre debajo, en dos líneas. Así el
+     código no lleva datos de nadie y cada usuario ve el suyo. */
+
+  var MARCA_SVG =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Presupuestos">' +
+      '<path d="M22 74a38 38 0 1 1 76 0" fill="none" stroke="#B08D57" stroke-width="4" stroke-linecap="round"/>' +
+      '<rect x="42" y="40" width="36" height="46" rx="4" fill="none" stroke="#16233A" stroke-width="4"/>' +
+      '<path d="M51 55h18M51 65h18M51 75h11" fill="none" stroke="#16233A" stroke-width="4" stroke-linecap="round"/>' +
+    '</svg>';
+
+  function inicialesDe(nombre) {
+    var palabras = String(nombre || '').trim().split(/\s+/).filter(Boolean);
+    if (!palabras.length) return '';
+    if (palabras.length === 1) return palabras[0].slice(0, 2).toUpperCase();
+    return (palabras[0].charAt(0) + palabras[1].charAt(0)).toUpperCase();
+  }
+
+  // Reparte el nombre en dos renglones, como en las tarjetas de visita
+  function renglonesDe(nombre) {
+    var palabras = String(nombre || '').trim().split(/\s+/).filter(Boolean);
+    if (palabras.length < 2) return [palabras.join(' ').toUpperCase(), ''];
+    var corte = Math.ceil(palabras.length / 2);
+    return [
+      palabras.slice(0, corte).join(' ').toUpperCase(),
+      palabras.slice(corte).join(' ').toUpperCase()
+    ];
+  }
+
+  // Ajusta cuerpo y espaciado para que el renglón quepa en el ancho dado
+  function encaja(texto, cuerpo, espaciado, ancho) {
+    var estimado = texto.length * (0.62 * cuerpo + espaciado);
+    var factor = estimado > ancho ? ancho / estimado : 1;
+    return { cuerpo: cuerpo * factor, espaciado: espaciado * factor };
+  }
+
+  function renglon(texto, y, cuerpo, espaciado) {
+    if (!texto) return '';
+    var a = encaja(texto, cuerpo, espaciado, 296);
+    return '<text x="160" y="' + y + '" text-anchor="middle" ' +
+      'font-family="Georgia, \'Times New Roman\', serif" ' +
+      'font-size="' + a.cuerpo.toFixed(1) + '" fill="#16233A" ' +
+      'letter-spacing="' + a.espaciado.toFixed(2) + '" ' +
+      'dx="' + (-a.espaciado / 2).toFixed(2) + '">' + escapaXML(texto) + '</text>';
+  }
+
+  function escapaXML(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function logoDe(nombre) {
+    var iniciales = inicialesDe(nombre);
+    if (!iniciales) return '';
+    var lineas = renglonesDe(nombre);
+    var dos = !!lineas[1];
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 ' + (dos ? 148 : 128) + '" ' +
+        'width="320" height="' + (dos ? 148 : 128) + '" role="img" aria-label="' + escapaXML(nombre) + '">' +
       '<g fill="none" stroke="#B08D57" stroke-width="2.6" stroke-linecap="round">' +
         '<path d="M120.53 66.36 A42 42 0 1 1 199.47 66.36"/>' +
       '</g>' +
-      '<text x="160" y="75" text-anchor="middle" font-family="Georgia, \'Times New Roman\', serif" ' +
-        'font-size="66" fill="#16233A" letter-spacing="-1">JA</text>' +
-      '<text x="160" y="112" text-anchor="middle" font-family="Georgia, \'Times New Roman\', serif" ' +
-        'font-size="20.5" fill="#16233A" letter-spacing="6" dx="-3">JOSE ANGEL</text>' +
-      '<text x="160" y="133" text-anchor="middle" font-family="Georgia, \'Times New Roman\', serif" ' +
-        'font-size="12.5" fill="#16233A" letter-spacing="4.6" dx="-2.3">DOMINGUEZ RAMOS</text>' +
+      '<text x="160" y="75" text-anchor="middle" ' +
+        'font-family="Georgia, \'Times New Roman\', serif" ' +
+        'font-size="' + (iniciales.length > 2 ? 52 : 66) + '" fill="#16233A" letter-spacing="-1">' +
+        escapaXML(iniciales) + '</text>' +
+      renglon(lineas[0], 112, 20.5, 6) +
+      renglon(lineas[1], 133, 12.5, 4.6) +
     '</svg>';
+  }
 
   var CONDICIONES = [
     'Validez del presupuesto: 15 días desde la fecha de emisión.',
@@ -152,15 +208,11 @@
 
   function ajustesPorDefecto() {
     return {
+      // En blanco a propósito: el asistente de la primera vez los pide y
+      // así el código no lleva los datos personales de nadie.
       emisor: {
-        nombre: 'Jose Angel Dominguez Ramos',
-        nif: '',
-        direccion: 'C/ Loreto y Chicote Nº5, 3º Drch',
-        cp: '28004',
-        ciudad: 'Madrid',
-        telefono: '695 948 921',
-        email: 'jadominguezramos@gmail.com',
-        web: ''
+        nombre: '', nif: '', direccion: '', cp: '', ciudad: '',
+        telefono: '', email: '', web: ''
       },
       logo: null,            // dataURL; si es null se usa el logotipo vectorial
       firma: null,           // dataURL de la firma escaneada
@@ -220,7 +272,9 @@
   }
 
   global.Base = {
-    LOGO_SVG: LOGO_SVG,
+    MARCA_SVG: MARCA_SVG,
+    logoDe: logoDe,
+    inicialesDe: inicialesDe,
     CONDICIONES: CONDICIONES,
     UNIDADES: UNIDADES,
     ESTADOS: ESTADOS,

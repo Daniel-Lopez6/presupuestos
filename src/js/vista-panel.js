@@ -68,8 +68,8 @@
         '<div style="flex:1">' +
           '<h2 style="margin:0 0 6px;font-size:16px">Todo listo para empezar</h2>' +
           '<p style="margin:0 0 14px;color:var(--texto-2);font-size:13.5px;max-width:60ch">' +
-            'Los datos del emisor ya están cargados y el banco de precios trae veinte partidas ' +
-            'habituales de reforma. Crea el primer presupuesto, ajusta lo que haga falta e imprime. ' +
+            'El banco de precios trae veinte partidas habituales de reforma para arrancar. ' +
+            'Crea el primer presupuesto, ajusta lo que haga falta e imprime. ' +
             'Todo queda guardado en este dispositivo.</p>' +
           '<div class="flex" style="gap:8px;flex-wrap:wrap">' +
             '<button class="btn btn-pri" id="pan-nuevo-2">' + UI.ic('mas', 16) + '<span>Crear el primero</span></button>' +

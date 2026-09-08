@@ -584,6 +584,8 @@ select { appearance: none; background-image: url("data:image/svg+xml;charset=utf
 }
 .bv-logo { max-width: 230px; margin: 0 auto 22px; }
 .bv-logo svg { width: 100%; height: auto; }
+.bv-marca { width: 96px; margin: 0 auto 22px; }
+.bv-marca svg { width: 100%; height: auto; }
 .bv-icono {
   width: 76px; height: 76px;
   margin: 0 auto 20px;

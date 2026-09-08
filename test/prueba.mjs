@@ -65,7 +65,10 @@ await pagina.click('.bienvenida [data-siguiente]');
 await pagina.waitForTimeout(120);
 comprueba('el segundo paso pide los datos del emisor',
   (await pagina.locator('.bienvenida [name=b_nif]').count()) === 1);
+await pagina.fill('.bienvenida [name=b_nombre]', 'Reformas Vega Santos');
 await pagina.fill('.bienvenida [name=b_nif]', '12345678z');
+await pagina.fill('.bienvenida [name=b_telefono]', '600 000 000');
+await pagina.fill('.bienvenida [name=b_email]', 'obras@ejemplo.es');
 await pagina.click('.bienvenida [data-guardar-datos]');
 await pagina.waitForTimeout(150);
 comprueba('el NIF escrito en el asistente queda guardado en mayúsculas',
@@ -82,8 +85,15 @@ comprueba('el asistente se cierra al terminar', (await pagina.locator('.bienveni
 comprueba('no vuelve a salir en el siguiente arranque',
   (await pagina.evaluate(() => App.estado.ajustes.bienvenidaVista)) === true);
 comprueba('hay banco de precios precargado', await pagina.evaluate(() => App.estado.partidas.length) === 20);
-comprueba('el emisor está configurado',
-  (await pagina.evaluate(() => App.estado.ajustes.emisor.nombre)) === 'Jose Angel Dominguez Ramos');
+comprueba('el emisor queda con lo escrito en el asistente',
+  (await pagina.evaluate(() => App.estado.ajustes.emisor.nombre)) === 'Reformas Vega Santos');
+comprueba('el logotipo se dibuja con las iniciales del nombre',
+  (await pagina.evaluate(() => Base.inicialesDe(App.estado.ajustes.emisor.nombre))) === 'RV');
+comprueba('el logotipo lleva el nombre repartido en dos renglones',
+  (await pagina.evaluate(() => {
+    const svg = Base.logoDe('Reformas Vega Santos');
+    return /REFORMAS VEGA/.test(svg) && /SANTOS/.test(svg);
+  })) === true);
 comprueba('el motor de datos es IndexedDB',
   (await pagina.evaluate(() => Store.info().motor)) === 'idb');
 
@@ -91,8 +101,8 @@ console.log('\n2. Presupuesto con 15 partidas');
 const datos = await pagina.evaluate(() => {
   const p = Modelo.nuevoPresupuesto(App.estado);
   Modelo.consumeNumero(App.estado);
-  p.cliente = { nombre: 'ADINCO S.L.', nif: 'B86745231', direccion: 'C/ Alcalá 145, 2º B',
-                cp: '28009', ciudad: 'Madrid', telefono: '914 552 331', email: 'obras@adinco.es' };
+  p.cliente = { nombre: 'Construcciones Miralbueno S.L.', nif: 'B99999999', direccion: 'C/ Mayor 12, 2º B',
+                cp: '50001', ciudad: 'Zaragoza', telefono: '900 000 000', email: 'obras@ejemplo.es' };
   p.objeto = 'Trabajos de reparación y acondicionamiento de techo y paramentos verticales en oficina de planta primera.';
   p.ivaPct = 21; p.irpfPct = 15;
   const banco = App.estado.partidas;
@@ -254,7 +264,7 @@ const tras = await pagina.evaluate(() => ({
 }));
 comprueba('los presupuestos sobreviven a recargar', tras.presupuestos === 2, JSON.stringify(tras));
 comprueba('los gastos sobreviven a recargar', tras.gastos === 3);
-comprueba('los datos del cliente se conservan', tras.cliente === 'ADINCO S.L.');
+comprueba('los datos del cliente se conservan', tras.cliente === 'Construcciones Miralbueno S.L.');
 
 console.log('\n8. Recorrido por la interfaz');
 for (const vista of ['panel', 'presupuestos', 'clientes', 'precios', 'gastos', 'fiscal', 'ajustes']) {

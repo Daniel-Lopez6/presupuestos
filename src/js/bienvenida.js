@@ -102,7 +102,7 @@
     var contenido = {
       hola: function () {
         return '<div class="bv-paso">' +
-          '<div class="bv-logo">' + global.Base.LOGO_SVG + '</div>' +
+          '<div class="bv-marca">' + global.Base.MARCA_SVG + '</div>' +
           '<h2>Tus presupuestos, en orden</h2>' +
           '<p>Aquí haces el presupuesto, lo imprimes o lo mandas en PDF, y sabes en ' +
             'todo momento cuáles están pendientes de respuesta. También llevas la cuenta ' +

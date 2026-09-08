@@ -48,7 +48,9 @@
       return '<div class="d-logo-texto"><strong>' + U.esc(ajustes.emisor.nombre) + '</strong></div>';
     }
     if (ajustes.logo) return '<img class="d-logo" src="' + ajustes.logo + '" alt="">';
-    return '<div class="d-logo d-logo-svg">' + Base.LOGO_SVG + '</div>';
+    var generado = Base.logoDe(ajustes.emisor.nombre);
+    if (!generado) return '';
+    return '<div class="d-logo d-logo-svg">' + generado + '</div>';
   }
 
   function cabeceraPrimera(estado, p) {

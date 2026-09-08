@@ -56,15 +56,18 @@
         '<div class="etiqueta">Logotipo del documento</div>' +
         '<div style="background:#F7F8FA;border:1px solid var(--linea);border-radius:8px;padding:16px;text-align:center;margin-bottom:10px">' +
           '<div id="aj-vista-logo" style="max-width:230px;margin:0 auto">' +
-            (a.logo ? '<img src="' + a.logo + '" style="max-width:100%;max-height:110px">' : Base.LOGO_SVG) +
+            (a.logo ? '<img src="' + a.logo + '" style="max-width:100%;max-height:110px">'
+              : (Base.logoDe(a.emisor.nombre) ||
+                 '<span class="tenue pequeno">Escribe tu nombre arriba y aquí verás el logotipo</span>')) +
           '</div>' +
         '</div>' +
         '<div class="flex" style="gap:8px;flex-wrap:wrap;margin-bottom:6px">' +
           '<label class="btn btn-s">' + UI.ic('subida', 15) + '<span>Subir logotipo</span>' +
             '<input type="file" id="aj-logo" accept="image/*" hidden></label>' +
-          (a.logo ? '<button class="btn btn-s" id="aj-logo-quitar">Volver al logotipo por defecto</button>' : '') +
+          (a.logo ? '<button class="btn btn-s" id="aj-logo-quitar">Volver al generado</button>' : '') +
         '</div>' +
-        '<div class="ayuda">PNG o JPG. Se guarda dentro de la aplicación y se reduce automáticamente.</div>' +
+        '<div class="ayuda">Si no subes ninguno, se dibuja con tus iniciales y tu nombre. ' +
+          'Para uno propio: PNG o JPG, se guarda dentro de la aplicación y se reduce solo.</div>' +
         '<label class="check" style="margin-top:12px"><input type="checkbox" name="mostrarLogo"' +
           (a.mostrarLogo !== false ? ' checked' : '') + '><span>Mostrar el logotipo en el documento</span></label>' +
 
