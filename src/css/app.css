@@ -155,7 +155,7 @@ a { color: var(--azul); }
 }
 .cabecera h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
 .cabecera-sub { font-size: 13px; color: var(--texto-2); margin-top: 1px; }
-.cabecera-acciones { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.cabecera-acciones { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .contenido { padding: 22px 26px 90px; flex: 1 1 auto; }
 .vista { display: none; }
@@ -432,6 +432,54 @@ select { appearance: none; background-image: url("data:image/svg+xml;charset=utf
 .toast.ok { background: #1E7A44; }
 @keyframes entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
+/* --- Guía de uso --------------------------------------------------------
+   No es una ventana modal: se queda a un lado y la aplicación se sigue
+   usando con ella abierta. En el móvil ocupa la pantalla, porque no cabe
+   de otra forma. */
+
+:root { --guia: 400px; }
+
+.guia-panel {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: var(--guia);
+  background: var(--panel);
+  border-left: 1px solid var(--linea);
+  box-shadow: -8px 0 30px rgba(16,24,40,.10);
+  display: flex; flex-direction: column;
+  z-index: 45;
+}
+.guia-barra {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 8px 10px 16px;
+  border-bottom: 1px solid var(--linea);
+  flex: 0 0 auto;
+}
+.guia-barra b { font-size: 14px; }
+.guia-barra .btn { margin-left: auto; }
+.guia-marco { flex: 1 1 auto; width: 100%; border: 0; display: block; }
+
+/* La aplicación se estrecha para que no quede nada debajo del panel */
+body.con-guia .principal { margin-right: var(--guia); }
+body.con-guia .cabecera { padding-right: 18px; }
+/* Los avisos flotantes se apartan para no quedar debajo de la guía */
+body.con-guia #avisos { right: calc(var(--guia) + 18px); }
+
+.btn-ayuda { flex: 0 0 auto; margin-left: auto; color: var(--texto-2); }
+.btn-ayuda.activo { background: var(--azul); border-color: var(--azul); color: #fff; }
+
+@media (max-width: 1180px) { :root { --guia: 340px; } }
+
+@media (max-width: 880px) {
+  .guia-panel { left: 0; width: auto; border-left: 0; z-index: 60; }
+  body.con-guia .principal { margin-right: 0; }
+  .guia-barra { padding: 10px 10px 10px 16px; }
+  /* Con la guía a pantalla completa no hay aplicación detrás a la que
+     avisar, y el aviso quedaría flotando encima del texto */
+  body.con-guia #avisos { display: none; }
+  .btn-ayuda { margin-left: auto; }
+}
+
 /* --- Vista previa del documento ----------------------------------------- */
 
 .previsualizacion { background: #6C7280; padding: 22px; overflow: auto; }
@@ -488,6 +536,28 @@ select { appearance: none; background-image: url("data:image/svg+xml;charset=utf
   .nav-movil button.activo svg { color: var(--oro); }
 
   .tabla-oculta-movil { display: none; }
+
+  /* Los avisos flotantes, por encima de la barra de abajo: si no, salen
+     debajo de ella y no se leen. */
+  #avisos { right: 12px; left: 12px; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); align-items: stretch; }
+  .toast { max-width: none; }
+
+  /* La tabla del panel se reparte en dos renglones, para que el estado se
+     vea entero sin tener que arrastrar la tabla de lado. */
+  .t-panel, .t-panel tbody, .t-panel tr, .t-panel td { display: block; width: auto; }
+  .t-panel tr {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--linea-2);
+  }
+  .t-panel tr:last-child { border-bottom: 0; }
+  .t-panel td { border: 0 !important; padding: 0; background: none !important; }
+  .t-panel .p-num { grid-column: 1; grid-row: 1; color: var(--texto-3); font-size: 12.5px; }
+  .t-panel .p-cli { grid-column: 2; grid-row: 1; font-weight: 600; }
+  .t-panel .p-imp { grid-column: 1 / -1; grid-row: 2; text-align: left; display: flex; align-items: center; gap: 10px; }
+  .t-panel .p-est { grid-column: 1 / -1; grid-row: 2; justify-self: end; }
 
   .tarjeta-cab .der { margin-left: 0; width: 100%; }
   .tarjeta-cab .der .btn { flex: 1 1 auto; }
@@ -615,6 +685,11 @@ select { appearance: none; background-image: url("data:image/svg+xml;charset=utf
   text-align: center;
 }
 .bv-logo-vista svg, .bv-logo-vista img { max-width: 100%; max-height: 62px; height: auto; }
+
+/* La misma sujeción para la vista previa de Ajustes: sin esto, un logotipo
+   con medidas propias se sale de la caja y en el móvil desplaza la página. */
+#aj-vista-logo svg, #aj-vista-logo img { display: block; max-width: 100%; height: auto; }
+#aj-vista-firma svg, #aj-vista-firma img { display: block; max-width: 100%; max-height: 70px; height: auto; }
 .bv-logo-fila > div:last-child { flex: 1 1 180px; }
 .bv-icono {
   width: 76px; height: 76px;

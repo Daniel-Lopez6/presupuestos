@@ -95,16 +95,16 @@
     var filas = lista.map(function (p) {
       var t = Modelo.totales(p);
       return '<tr class="fila-click" data-abrir="' + p.id + '">' +
-        '<td class="fuerte nowrap">' + U.esc(p.numero) + '</td>' +
-        '<td>' + U.esc(p.cliente.nombre || '—') + '</td>' +
-        '<td class="num fuerte">' + U.eur(t.total) + '</td>' +
-        '<td>' + UI.etiquetaEstado(Modelo.estadoEfectivo(p, hoy)) + '</td>' +
+        '<td class="fuerte nowrap p-num">' + U.esc(p.numero) + '</td>' +
+        '<td class="p-cli">' + U.esc(p.cliente.nombre || '—') + '</td>' +
+        '<td class="num fuerte p-imp">' + U.eur(t.total) + '</td>' +
+        '<td class="p-est">' + UI.etiquetaEstado(Modelo.estadoEfectivo(p, hoy)) + '</td>' +
       '</tr>';
     }).join('');
 
     return '<div class="tarjeta"><div class="tarjeta-cab"><h2>Últimos presupuestos</h2>' +
       '<div class="der"><button class="btn btn-s" data-vista="presupuestos">Ver todos</button></div></div>' +
-      '<div class="tabla-caja"><table class="t"><tbody>' + filas + '</tbody></table></div></div>';
+      '<div class="tabla-caja"><table class="t t-panel"><tbody>' + filas + '</tbody></table></div></div>';
   }
 
   function tarjetaAvisos(m) {

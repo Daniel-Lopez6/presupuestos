@@ -33,7 +33,9 @@
     } else if (s.indexOf(',') > -1) {
       s = s.replace(',', '.');
     }
-    s = s.replace(/[^0-9.\-]/g, '');
+    // Si queda algo que no sea un número, es que no lo era: mejor cero que
+    // inventarse una cifra quitando letras de en medio.
+    if (!/^-?[0-9]*\.?[0-9]*$/.test(s)) return 0;
     var n = parseFloat(s);
     return isFinite(n) ? n : 0;
   }

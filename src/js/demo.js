@@ -196,17 +196,21 @@
       }
     }
 
-    // Que quede al menos uno esperando respuesta y dentro de plazo: si no,
-    // el panel enseña un cero donde debería verse el trabajo pendiente.
-    var recientes = presupuestos.filter(function (p) {
-      return p.estado !== 'borrador' && p.fecha >= restaDias(hoy, 12);
-    });
-    if (recientes.length) {
-      var elegido = recientes[recientes.length - 1];
+    // Al menos uno tiene que quedar esperando respuesta y dentro de plazo. Si
+    // no, el panel enseña un cero donde debería verse el trabajo pendiente.
+    // Se fuerza al final, porque un enviado con la validez pasada la propia
+    // aplicación lo cuenta ya como caducado.
+    var candidatos = presupuestos.filter(function (p) { return p.estado !== 'borrador'; });
+    if (candidatos.length) {
+      var elegido = candidatos[candidatos.length - 1];
       elegido.estado = 'enviado';
-      elegido.fechaEnvio = elegido.fecha;
+      elegido.validezDias = 15;
+      elegido.fecha = restaDias(hoy, 4);
+      elegido.fechaEnvio = restaDias(hoy, 3);
       elegido.fechaRespuesta = null;
       elegido.notas = 'Enviado por correo. Quedó en contestar esta semana.';
+      elegido.creado = elegido.fecha + 'T09:00:00.000Z';
+      elegido.modificado = elegido.fechaEnvio + 'T18:00:00.000Z';
     }
 
     estado.ajustes.numeracion.siguiente = contador;
@@ -228,8 +232,13 @@
     p.objeto = trabajo.objeto;
     p.lineas = trabajo.lineas.map(function (l) {
       if (l[0] === 'S') return Modelo.nuevaLinea({ tipo: 'seccion', descripcion: l[1] });
-      // Se mueve un poco la medición para que no salgan dos iguales.
-      var cantidad = U.r2(l[3] * (0.9 + az(0, 0.2)));
+      // Se mueve un poco la medición para que no salgan dos iguales, pero lo
+      // que se cuenta por piezas se queda en números enteros: nadie pone
+      // "0,9 ud" de una instalación de fontanería en un presupuesto.
+      var cantidad = l[3] * (0.9 + az(0, 0.2));
+      cantidad = /^(ud|saco|jornada|pa)$/.test(l[2])
+        ? Math.max(1, Math.round(cantidad))
+        : U.r2(cantidad);
       return Modelo.nuevaLinea({ codigo: l[0], descripcion: l[1], unidad: l[2], cantidad: cantidad, precio: l[4] });
     });
     p.lineas.forEach(function (l, i) { l.id = 'lin_demo_' + (n + 1) + '_' + i; });
@@ -248,9 +257,16 @@
     var estadoP = CICLO[n % CICLO.length];
     var envio = iso(anio, mes, Math.min(28, dia + 1));
     var fechaRespuesta = iso(anio, mes, Math.min(28, dia + 6));
-    // Un presupuesto de hace cuatro días no puede estar caducado todavía:
-    // solo caduca lo que se envió hace más de un par de meses.
-    if (estadoP === 'caducado' && mes > mesHoy - 2) estadoP = 'enviado';
+    // "Caducado" no se guarda: la aplicación lo deduce de un enviado al que se
+    // le pasó la validez. Así que aquí se deja enviado y con fecha vieja.
+    if (estadoP === 'caducado') {
+      estadoP = 'enviado';
+      p.validezDias = 15;
+      if (mes > mesHoy - 2) {
+        p.fecha = iso(anio, Math.max(1, mesHoy - 3), 12);
+        envio = iso(anio, Math.max(1, mesHoy - 3), 13);
+      }
+    }
     // Y el último de todos se queda a medias, como pasa en la vida real.
     if (esElUltimo) estadoP = 'borrador';
     p.estado = estadoP;

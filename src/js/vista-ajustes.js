@@ -180,6 +180,8 @@
           'Es la forma de pasar los datos a otro dispositivo y de no perder nada si se estropea este.</div>' +
         '<div class="linea-sep"></div>' +
         '<div class="flex" style="gap:8px;flex-wrap:wrap">' +
+          (global.Guia ? '<button class="btn" data-guia>' + UI.ic('info', 15) +
+            '<span>Guía de uso</span></button>' : '') +
           '<button class="btn" id="aj-asistente">' + UI.ic('bombilla', 15) +
             '<span>Repetir la puesta en marcha</span></button>' +
           (global.Demo ? '<button class="btn" id="aj-demo">' + UI.ic('bombilla', 15) +

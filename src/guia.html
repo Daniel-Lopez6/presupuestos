@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#16233A">
+<title>Manual de obra</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --tinta: #16233A;
+  --tinta-2: #4A5568;
+  --tinta-3: #7C8698;
+  --fondo: #EEF0F3;
+  --papel: #FFFFFF;
+  --linea: #DCE0E7;
+  --linea-2: #E9ECF1;
+  --oro: #A8834C;
+  --oro-suave: #F4EDE1;
+  --verde: #1B6B3D;
+  --verde-suave: #E4F1E9;
+  --ambar: #9A6510;
+  --ambar-suave: #FAF0DD;
+  --rojo: #A6342A;
+  --sombra: 0 1px 2px rgba(16,24,40,.05), 0 6px 20px rgba(16,24,40,.07);
+  --ff-tit: 'Zilla Slab', Georgia, 'Times New Roman', serif;
+  --ff-txt: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tinta: #E7EAF0;
+    --tinta-2: #AEB7C6;
+    --tinta-3: #7C8698;
+    --fondo: #10151F;
+    --papel: #19202C;
+    --linea: #2B3444;
+    --linea-2: #232B39;
+    --oro: #C9A468;
+    --oro-suave: #2A2418;
+    --verde: #6FCB96;
+    --verde-suave: #14261C;
+    --ambar: #D9A44E;
+    --ambar-suave: #2A2113;
+    --rojo: #E58C82;
+    --sombra: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"] {
+  --tinta: #E7EAF0;
+  --tinta-2: #AEB7C6;
+  --tinta-3: #7C8698;
+  --fondo: #10151F;
+  --papel: #19202C;
+  --linea: #2B3444;
+  --linea-2: #232B39;
+  --oro: #C9A468;
+  --oro-suave: #2A2418;
+  --verde: #6FCB96;
+  --verde-suave: #14261C;
+  --ambar: #D9A44E;
+  --ambar-suave: #2A2113;
+  --rojo: #E58C82;
+  --sombra: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35);
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--ff-txt);
+  font-size: 16.5px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.hoja { max-width: 720px; margin: 0 auto; padding: 0 18px 80px; }
+
+/* --- Cabecera ---------------------------------------------------------- */
+.portada {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 40px 0 26px;
+  border-bottom: 2px solid var(--tinta);
+}
+.sello {
+  display: inline-flex; align-items: center; gap: 9px;
+  align-self: flex-start;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--oro);
+}
+.sello span { display: block; width: 26px; height: 2px; background: var(--oro); }
+h1 {
+  font-family: var(--ff-tit); font-weight: 700;
+  font-size: clamp(38px, 10vw, 56px); line-height: 1.02;
+  letter-spacing: -.02em; margin: 0; text-wrap: balance;
+}
+.entradilla { font-size: 18px; color: var(--tinta-2); margin: 0; max-width: 56ch; }
+
+/* --- Índice ------------------------------------------------------------ */
+.indice { display: grid; gap: 2px; margin: 26px 0 8px; }
+.indice a {
+  display: grid; grid-template-columns: 30px 1fr; align-items: baseline; gap: 12px;
+  padding: 11px 12px; border-radius: 8px;
+  color: var(--tinta); text-decoration: none;
+  border: 1px solid transparent;
+}
+.indice a:hover, .indice a:focus-visible {
+  background: var(--papel); border-color: var(--linea);
+}
+.indice b { font-family: var(--ff-tit); color: var(--oro); font-size: 15px; font-variant-numeric: tabular-nums; }
+.indice em { display: block; font-style: normal; color: var(--tinta-3); font-size: 14px; }
+
+/* --- Secciones --------------------------------------------------------- */
+section { padding-top: 42px; }
+.eyebrow {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--tinta-3); margin: 0 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+h2 {
+  font-family: var(--ff-tit); font-weight: 600;
+  font-size: clamp(25px, 5.5vw, 31px); line-height: 1.15; letter-spacing: -.01em;
+  margin: 0 0 14px; text-wrap: balance;
+}
+h3 {
+  font-family: var(--ff-tit); font-weight: 600; font-size: 19px;
+  margin: 26px 0 8px; letter-spacing: -.005em;
+}
+p { margin: 0 0 14px; max-width: 64ch; }
+a { color: var(--oro); }
+
+/* --- Pasos numerados --------------------------------------------------- */
+ol.pasos { list-style: none; counter-reset: paso; padding: 0; margin: 0; display: grid; gap: 3px; }
+ol.pasos > li {
+  counter-increment: paso;
+  display: grid; grid-template-columns: 32px 1fr; gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--linea-2);
+}
+ol.pasos > li:last-child { border-bottom: 0; }
+ol.pasos > li::before {
+  content: counter(paso);
+  font-family: var(--ff-tit); font-weight: 700; font-size: 16px;
+  color: var(--papel); background: var(--tinta);
+  width: 27px; height: 27px; border-radius: 50%;
+  display: grid; place-items: center;
+  margin-top: 1px; font-variant-numeric: tabular-nums;
+}
+ol.pasos > li > :first-child { margin-top: 0; }
+ol.pasos p:last-child { margin-bottom: 0; }
+
+/* --- Caja de aviso ----------------------------------------------------- */
+.nota {
+  display: grid; grid-template-columns: auto 1fr; gap: 12px;
+  padding: 14px 16px; border-radius: 10px;
+  background: var(--oro-suave); border: 1px solid color-mix(in srgb, var(--oro) 28%, transparent);
+  margin: 18px 0; font-size: 15.5px;
+}
+.nota.ojo { background: var(--ambar-suave); border-color: color-mix(in srgb, var(--ambar) 32%, transparent); }
+.nota.bien { background: var(--verde-suave); border-color: color-mix(in srgb, var(--verde) 30%, transparent); }
+.nota .marca { font-family: var(--ff-tit); font-weight: 700; font-size: 14px; color: var(--oro); letter-spacing: .04em; }
+.nota.ojo .marca { color: var(--ambar); }
+.nota.bien .marca { color: var(--verde); }
+.nota p { margin: 0; }
+.nota p + p { margin-top: 8px; }
+
+/* --- Ficha del presupuesto (ilustración) ------------------------------- */
+.ficha {
+  background: var(--papel); border: 1px solid var(--linea); border-radius: 10px;
+  box-shadow: var(--sombra); overflow: hidden; margin: 18px 0;
+}
+.ficha-cab {
+  padding: 11px 15px; border-bottom: 1px solid var(--linea-2);
+  font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--tinta-3);
+}
+.tabla-caja { overflow-x: auto; }
+table.mini { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 420px; }
+table.mini th {
+  text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--tinta-3); padding: 9px 15px; border-bottom: 1px solid var(--linea-2);
+}
+table.mini td { padding: 10px 15px; border-bottom: 1px solid var(--linea-2); vertical-align: top; }
+table.mini tr:last-child td { border-bottom: 0; }
+table.mini .n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.mini .cap { font-weight: 600; background: color-mix(in srgb, var(--oro) 9%, transparent); }
+.pista { font-size: 13.5px; color: var(--tinta-3); margin: -6px 0 18px; }
+
+/* --- Lista de comprobación --------------------------------------------- */
+.checklist { display: grid; gap: 2px; margin: 6px 0 0; padding: 0; list-style: none; }
+.checklist li { border-bottom: 1px solid var(--linea-2); }
+.checklist li:last-child { border-bottom: 0; }
+.checklist label {
+  display: grid; grid-template-columns: auto 1fr; gap: 13px; align-items: start;
+  padding: 12px 4px; cursor: pointer;
+}
+.checklist input {
+  width: 21px; height: 21px; margin: 1px 0 0; accent-color: var(--verde); cursor: pointer;
+}
+.checklist input:checked + span { color: var(--tinta-3); text-decoration: line-through; text-decoration-color: var(--tinta-3); }
+.checklist span { transition: color .15s; }
+.checklist small { display: block; color: var(--tinta-3); font-size: 14px; text-decoration: none; }
+
+/* --- Tabla de averías --------------------------------------------------- */
+.averias { display: grid; gap: 0; }
+.averia {
+  display: grid; grid-template-columns: 1fr; gap: 4px;
+  padding: 15px 0; border-bottom: 1px solid var(--linea-2);
+}
+.averia:last-child { border-bottom: 0; }
+.averia b { font-weight: 600; }
+.averia span { color: var(--tinta-2); font-size: 15.5px; }
+
+/* --- Reglas fiscales ---------------------------------------------------- */
+.reglas { display: grid; gap: 14px; margin: 18px 0 0; }
+.regla {
+  background: var(--papel); border: 1px solid var(--linea); border-left: 3px solid var(--oro);
+  border-radius: 0 10px 10px 0; padding: 14px 16px;
+}
+.regla h4 { font-family: var(--ff-tit); font-size: 17px; margin: 0 0 5px; font-weight: 600; }
+.regla p { margin: 0; font-size: 15.5px; color: var(--tinta-2); }
+
+.cierre {
+  margin-top: 52px; padding-top: 22px; border-top: 2px solid var(--tinta);
+  font-size: 14.5px; color: var(--tinta-3);
+}
+kbd {
+  font-family: var(--ff-txt); font-size: .93em; font-weight: 600;
+  background: var(--papel); border: 1px solid var(--linea); border-radius: 5px;
+  padding: 1px 6px; white-space: nowrap; color: var(--tinta);
+}
+:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+<style>body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<div class="hoja">
+
+  <header class="portada" id="arriba">
+    <div class="sello"><span></span>Presupuestos · cómo se usa</div>
+    <h1>Manual de obra</h1>
+    <p class="entradilla">Cómo se usa la aplicación, por orden: primero lo que hay que preparar, después el trabajo de cada día, y al final qué hacer si algo falla.</p>
+  </header>
+
+  <nav class="indice" aria-label="Contenido">
+    <a href="#a1"><b>01</b><div>La primera vez<em>Se hace una sola vez</em></div></a>
+    <a href="#a2"><b>02</b><div>Tus precios<em>Lo que más tiempo ahorra después</em></div></a>
+    <a href="#a3"><b>03</b><div>Hacer un presupuesto<em>Cliente, partidas, IVA, imprimir</em></div></a>
+    <a href="#a4"><b>04</b><div>Enviarlo y marcar la respuesta<em>Enviado, aceptado, rechazado</em></div></a>
+    <a href="#a5"><b>05</b><div>Apuntar los gastos<em>Cada factura que pagas</em></div></a>
+    <a href="#a6"><b>06</b><div>El resumen del trimestre<em>Lo que necesita el gestor</em></div></a>
+    <a href="#a7"><b>07</b><div>El móvil y el ordenador a la vez<em>Con la cuenta de Google</em></div></a>
+    <a href="#a8"><b>08</b><div>Copias de seguridad<em>Dónde se guardan los datos</em></div></a>
+    <a href="#a9"><b>09</b><div>Si algo va mal<em>Los cinco problemas más comunes</em></div></a>
+  </nav>
+
+  <!-- 01 -->
+  <section id="a1">
+    <p class="eyebrow">01 · Preparar</p>
+    <h2>La primera vez</h2>
+    <p>Al abrirla por primera vez sale un asistente que te va pidiendo lo necesario. No hay que instalar nada ni registrarse en ningún sitio.</p>
+
+    <ol class="pasos">
+      <li><p><b>Tus datos.</b> Nombre o razón social, NIF, teléfono y correo. Es lo que sale en la cabecera de todos los presupuestos, así que escríbelo tal como quieres que lo lea el cliente.</p></li>
+      <li><p><b>Tu logotipo.</b> Mientras escribes el nombre se va dibujando uno solo, con tus iniciales dentro de un arco. Si ya tienes el tuyo hecho, <b>Subir el mío</b> lo sustituye. Vale PNG, JPG o SVG; el SVG es el que mejor sale impreso porque no se pixela.</p></li>
+      <li><p><b>Google Drive.</b> Un botón, entras con tu cuenta de Google y ya está. Sirve para que lo que apuntes en la obra desde el móvil aparezca en el ordenador de casa. Si vas a usar solo un aparato, se puede dejar para más adelante.</p></li>
+      <li><p><b>Instalarla.</b> Queda con su icono, se abre en su propia ventana sin barra de navegador y funciona sin cobertura. En el iPhone se hace desde el botón <b>Compartir</b> → <b>Añadir a pantalla de inicio</b>.</p></li>
+    </ol>
+
+    <div class="nota bien">
+      <div class="marca">Nota</div>
+      <p>Si te lo saltaste o quieres repetirlo: <b>Ajustes</b> → <em>Repetir la puesta en marcha</em>.</p>
+    </div>
+
+    <h3>Antes de empezar en serio</h3>
+    <p>Seis cosas que conviene dejar hechas el primer día. Puedes ir marcándolas según las hagas.</p>
+    <ul class="checklist" id="lista">
+      <li><label><input type="checkbox" data-k="1"><span>Revisar mis datos y el NIF en <b>Ajustes</b><small>Salen en cada presupuesto</small></span></label></li>
+      <li><label><input type="checkbox" data-k="2"><span>Poner mis precios en <b>Precios</b><small>Los veinte que vienen son de ejemplo, hay que cambiarlos por los tuyos</small></span></label></li>
+      <li><label><input type="checkbox" data-k="3"><span>Ajustar el IVA y la validez habituales<small>Ajustes → Valores por defecto. Se aplican a los presupuestos nuevos</small></span></label></li>
+      <li><label><input type="checkbox" data-k="4"><span>Escribir mis condiciones generales<small>Forma de pago, plazos, lo que no incluye. Se copian solas en cada uno</small></span></label></li>
+      <li><label><input type="checkbox" data-k="5"><span>Conectar Google Drive en el móvil y en el ordenador<small>La misma cuenta en los dos sitios</small></span></label></li>
+      <li><label><input type="checkbox" data-k="6"><span>Descargar la primera copia de seguridad<small>Ajustes → Descargar copia. Al correo o a un pendrive</small></span></label></li>
+    </ul>
+  </section>
+
+  <!-- 02 -->
+  <section id="a2">
+    <p class="eyebrow">02 · Preparar</p>
+    <h2>Tus precios</h2>
+    <p>El banco de precios es la lista de cosas que sabes hacer con lo que cobras por cada una. Con la lista hecha, preparar un presupuesto son cinco minutos.</p>
+
+    <div class="ficha">
+      <div class="ficha-cab">Así es una partida</div>
+      <div class="tabla-caja">
+        <table class="mini">
+          <thead><tr><th>Código</th><th>Descripción</th><th>Ud.</th><th class="n">Precio</th></tr></thead>
+          <tbody>
+            <tr><td>AL-01</td><td>Alicatado de azulejo cerámico con adhesivo cementoso, sin incluir material</td><td>m²</td><td class="n">26,00 €</td></tr>
+            <tr><td>MO-03</td><td>Jornada completa de oficial</td><td>jornada</td><td class="n">180,00 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="pista">El código lo pones tú y sirve para encontrar la partida rápido. La descripción es la que lee el cliente, así que conviene escribirla bien una vez.</p>
+
+    <h3>Categorías</h3>
+    <p>Las partidas van agrupadas por oficios: Albañilería, Pintura, Mano de obra… Con <b>+ Categoría</b> creas las tuyas. Al elegir una te salen al lado el lápiz para cambiarle el nombre y la papelera para borrarla; si la borras te pregunta qué hacer con sus partidas, así que no se pierde nada sin avisar.</p>
+
+    <h3>Meterlas todas a la vez</h3>
+    <p>Si ya tienes tus precios en un Excel, <b>Importar CSV</b> los mete todos de una vez. Y <b>Exportar CSV</b> te los saca para revisarlos en el ordenador.</p>
+  </section>
+
+  <!-- 03 -->
+  <section id="a3">
+    <p class="eyebrow">03 · El día a día</p>
+    <h2>Hacer un presupuesto</h2>
+
+    <ol class="pasos">
+      <li><p><b>El cliente.</b> Si es nuevo, lo escribes; si ya lo tienes, lo eliges de la lista y se rellena solo. El botón <b>Guardar en clientes</b> lo mete en la agenda para la próxima.</p></li>
+      <li><p><b>El objeto.</b> Una o dos frases que resuman la obra: «Reforma integral de baño en vivienda». Es lo primero que lee el cliente.</p></li>
+      <li><p><b>Las partidas.</b> Con el botón <b>Del banco de precios</b> añades las tuyas, y con <b>Partida</b> escribes una a mano. <b>Capítulo</b> crea una separación con título: «Demolición», «Instalaciones», «Acabados». En presupuestos largos ayuda a que el cliente lo entienda.</p></li>
+      <li><p><b>El IVA.</b> Mira el recuadro de abajo: es el error más frecuente.</p></li>
+      <li><p><b>Imprimir o PDF.</b> El botón <b>Imprimir / PDF</b> abre el cuadro de impresión del navegador; ahí eliges <em>Guardar como PDF</em> y ya lo puedes mandar por WhatsApp o por correo.</p></li>
+    </ol>
+
+    <div class="nota ojo">
+      <div class="marca">IVA</div>
+      <p><b>El 10 % pide tres cosas a la vez:</b> que el cliente sea un particular o una comunidad de vecinos, que la vivienda tenga más de dos años, y que el material que pongas tú no pase del 40 % del importe sin IVA.</p>
+      <p>Si falla cualquiera de las tres, va al 21 %. En local de negocio y en obra nueva, siempre el 21 %.</p>
+    </div>
+
+    <div class="nota">
+      <div class="marca">IRPF</div>
+      <p><b>En obras y reformas va sin retención.</b> La retención en factura la aplican las actividades profesionales, como un arquitecto o un aparejador, no las empresariales. Déjalo en cero salvo que tu gestor te indique otra cosa.</p>
+    </div>
+
+    <p>Antes de mandarlo, <b>Vista previa</b> te enseña la hoja tal como va a salir impresa, con tu logotipo, el desglose y el espacio para las firmas.</p>
+  </section>
+
+  <!-- 04 -->
+  <section id="a4">
+    <p class="eyebrow">04 · El día a día</p>
+    <h2>Enviarlo y marcar la respuesta</h2>
+    <p>Cada presupuesto tiene un estado, y de ahí salen los números del Panel y del resumen trimestral. Cambiarlo es elegir en un desplegable, y conviene hacerlo siempre.</p>
+
+    <div class="ficha">
+      <div class="ficha-cab">Los estados</div>
+      <div class="tabla-caja">
+        <table class="mini">
+          <tbody>
+            <tr><td class="cap">Borrador</td><td>Lo estás escribiendo. Todavía no cuenta en ningún número.</td></tr>
+            <tr><td class="cap">Enviado</td><td>Ya se lo has pasado al cliente. Desde ese momento cuentan los días de validez.</td></tr>
+            <tr><td class="cap">Aceptado</td><td>Trabajo contratado. Es lo que suma en el resumen del trimestre.</td></tr>
+            <tr><td class="cap">Rechazado</td><td>El cliente ha dicho que no. Sirve para calcular la tasa de aceptación.</td></tr>
+            <tr><td class="cap">Caducado</td><td>No se elige: aparece solo cuando a un enviado se le pasan los días de validez.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p>El Panel avisa de los que están a punto de caducar y de los que ya caducaron sin respuesta, con el nombre del cliente, para que sepas a quién llamar.</p>
+
+    <div class="nota bien">
+      <div class="marca">Si caduca</div>
+      <p>No hay que rehacerlo: ábrelo, amplía la validez o cámbiale la fecha a hoy, y lo vuelves a enviar.</p>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section id="a5">
+    <p class="eyebrow">05 · El día a día</p>
+    <h2>Apuntar los gastos</h2>
+    <p>Cada factura que pagas se apunta en <b>Gastos</b>: fecha, proveedor, base e IVA. La categoría que elijas decide qué parte es deducible, y la aplicación te lo explica debajo al elegirla.</p>
+
+    <h3>Los errores más frecuentes</h3>
+    <div class="reglas">
+      <div class="regla">
+        <h4>La furgoneta y el coche no son lo mismo</h4>
+        <p>Una furgoneta de trabajo se deduce entera, IVA e IRPF. Un coche particular admite la mitad del IVA y <b>nada</b> en IRPF, porque un turismo no puede estar afecto a medias. Por eso hay una categoría para cada uno.</p>
+      </div>
+      <div class="regla">
+        <h4>Las dietas hay que pagarlas con tarjeta</h4>
+        <p>Como mucho 26,67 € al día si vuelves a dormir a casa, o 53,34 € si te quedas fuera. Tiene que ser día de trabajo, fuera de tu municipio, y pagado con tarjeta o transferencia: en efectivo no vale.</p>
+      </div>
+      <div class="regla">
+        <h4>La herramienta depende de lo que cueste</h4>
+        <p>Lo que cueste menos de 300 € por pieza va entero al gasto del año, hasta 25.000 € entre todo. Lo que cueste más se reparte en varios años como amortización.</p>
+      </div>
+      <div class="regla">
+        <h4>Las dos casillas del final</h4>
+        <p><b>Afectación</b> es el porcentaje que va a IRPF y <b>IVA deducible</b> el del IVA, para los casos raros en que la ley usa dos números distintos. Déjalas en blanco y se aplica lo normal de cada categoría.</p>
+      </div>
+    </div>
+
+    <div class="nota ojo">
+      <div class="marca">Importante</div>
+      <p>Guarda la factura, en papel o en PDF. Sin factura completa a tu nombre, el gasto no se puede deducir aunque esté apuntado aquí.</p>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section id="a6">
+    <p class="eyebrow">06 · Cada tres meses</p>
+    <h2>El resumen del trimestre</h2>
+    <p>En <b>Resumen</b> tienes, por trimestre, el IVA que te sale a ingresar y el pago fraccionado del IRPF. Se calcula con los presupuestos marcados como aceptados y los gastos que has apuntado.</p>
+
+    <div class="ficha">
+      <div class="ficha-cab">Qué es cada cosa</div>
+      <div class="tabla-caja">
+        <table class="mini">
+          <tbody>
+            <tr><td class="cap">IVA repercutido</td><td>El que le has cobrado al cliente.</td></tr>
+            <tr><td class="cap">IVA soportado</td><td>El que has pagado tú en las facturas de tus gastos.</td></tr>
+            <tr><td class="cap">A ingresar</td><td>La diferencia entre los dos. Es el modelo 303. Ese dinero no es tuyo, lo has cobrado por cuenta de Hacienda: conviene reservarlo.</td></tr>
+            <tr><td class="cap">Pago fraccionado</td><td>El 20 % de lo que llevas ganado en el año, menos lo que ya pagaste en trimestres anteriores. Es el modelo 130.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p><b>Exportar para la gestoría</b> descarga un archivo con todos los gastos del periodo ordenados, listo para enviarlo por correo.</p>
+
+    <div class="nota">
+      <div class="marca">Importante</div>
+      <p>Esto es una estimación, no una declaración. Sirve para saber por dónde vas y llevar los números ordenados al asesor, que es quien presenta los modelos. Los ingresos se calculan con los presupuestos aceptados, no con facturas emitidas.</p>
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section id="a7">
+    <p class="eyebrow">07 · Los dos aparatos</p>
+    <h2>El móvil y el ordenador a la vez</h2>
+    <p>En <b>Ajustes</b> → <em>Conectar con Google Drive</em>, con la misma cuenta de Google en los dos sitios. A partir de ahí no hay que hacer nada más: lo que apuntes desde el móvil aparece en el ordenador, y al revés.</p>
+
+    <p>Los datos se guardan en una carpeta oculta de tu propio Drive que solo ve esta aplicación. No aparece entre tus archivos y nadie más la lee. Si cambias lo mismo en los dos aparatos estando sin cobertura, al recuperar la conexión se queda la versión más reciente de cada presupuesto.</p>
+
+    <div class="nota bien">
+      <div class="marca">Sin cobertura</div>
+      <p>Puedes trabajar todo el día sin conexión. Se guarda en el aparato y sube solo cuando vuelvas a tener línea. Si alguna vez sincroniza algo que no esperabas, en Ajustes tienes <em>Deshacer la última</em>.</p>
+    </div>
+
+    <h3>Ponerla en la pantalla de inicio</h3>
+    <p><b>iPhone:</b> botón Compartir → <em>Añadir a pantalla de inicio</em>. <b>Android:</b> menú de tres puntos → <em>Instalar aplicación</em>. Queda como una aplicación más y se abre sin barra de navegador.</p>
+  </section>
+
+  <!-- 08 -->
+  <section id="a8">
+    <p class="eyebrow">08 · Seguridad</p>
+    <h2>Copias de seguridad</h2>
+    <p>Los datos se guardan dentro del navegador de ese aparato. No es un archivo que puedas ver en tus carpetas, y no sale de ahí salvo que conectes Drive.</p>
+
+    <p>Ahí se quedan indefinidamente: no caducan, no se borran al cerrar el navegador ni al apagar el ordenador. Lo que sí los borra es limpiar los datos de navegación eligiendo <em>cookies y datos de sitios</em>, usar la aplicación en una ventana de incógnito, o perder el aparato. En el iPhone hay algo más: si pasas mucho tiempo sin abrirla, Safari puede borrar esos datos por su cuenta.</p>
+
+    <h3>Descargar y restaurar</h3>
+    <ol class="pasos">
+      <li><p><b>Ajustes → Descargar copia.</b> Baja un archivo <kbd>.json</kbd> con todo lo que haya en ese momento. Guárdalo en un sitio seguro: el correo, un pendrive o una carpeta del ordenador.</p></li>
+      <li><p><b>Ajustes → Restaurar copia.</b> Eliges el archivo y te pregunta qué hacer con él.</p></li>
+      <li><p><b>Juntar</b> deja lo que ya tienes y añade lo que traiga la copia. Es la opción normal para pasar los datos del ordenador al móvil.</p></li>
+      <li><p><b>Reemplazar</b> borra todo lo de ahora y deja solo lo de la copia. Es la opción para volver a un punto anterior si algo se ha estropeado.</p></li>
+    </ol>
+
+    <div class="nota ojo">
+      <div class="marca">Si no usas Drive</div>
+      <p>Entonces la copia es imprescindible. Los datos están solo en ese aparato: si se estropea o se pierde, se pierden con él. El Panel avisa cuando llevas mucho tiempo sin descargar ninguna.</p>
+    </div>
+
+    <h3>Los datos de ejemplo</h3>
+    <p>En <b>Ajustes</b> → <em>Cargar datos de ejemplo</em> se llena la aplicación con un año de trabajo inventado, para verla funcionando y practicar sin estropear nada. El mismo botón los quita después, y solo borra lo inventado: lo que hayas metido tú se queda.</p>
+  </section>
+
+  <!-- 09 -->
+  <section id="a9">
+    <p class="eyebrow">09 · Averías</p>
+    <h2>Si algo va mal</h2>
+    <div class="averias">
+      <div class="averia">
+        <b>«No se pueden guardar los datos»</b>
+        <span>Estás en una ventana de incógnito, o el navegador tiene bloqueado el almacenamiento. Ábrela en una ventana normal.</span>
+      </div>
+      <div class="averia">
+        <b>«Vuelve a conectar Drive»</b>
+        <span>Google caduca el permiso cada pocas horas. Ajustes → <em>Reconectar</em> y continúa donde estaba. No se pierde nada.</span>
+      </div>
+      <div class="averia">
+        <b>El PDF sale con cabecera y pie del navegador</b>
+        <span>En el cuadro de impresión, desactiva <em>Encabezados y pies de página</em> y pon los márgenes en <em>Ninguno</em>.</span>
+      </div>
+      <div class="averia">
+        <b>Guardé un cliente y ahora no está</b>
+        <span>Normalmente es que tienes dos copias de la aplicación, el enlace y el archivo del escritorio, y cada una guarda sus propios datos. Ajustes te dice en cuál estás. Para pasar los datos de una a otra, usa la copia de seguridad.</span>
+      </div>
+      <div class="averia">
+        <b>Se ha borrado algo sin querer</b>
+        <span>Restaura la última copia de seguridad desde Ajustes, eligiendo <em>Juntar</em> si solo quieres recuperar lo que falta.</span>
+      </div>
+    </div>
+  </section>
+
+  <p style="margin-top:34px"><a href="#arriba">↑ Volver al índice</a></p>
+
+  <p class="cierre">Los cálculos fiscales son una estimación, no una declaración. Quien presenta los modelos 303 y 130 es tu asesor. Esto sirve para llevarle los números ordenados y para saber, cualquier día del trimestre, por dónde vas.</p>
+
+</div>
+
+<script>
+(function () {
+  // Los enlaces del índice: dentro de la aplicación esta página va en un marco
+  // sin dirección propia, así que un salto normal se llevaría la ventana entera.
+  // Se mueve la página a mano y no se toca la barra de direcciones.
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!a) return;
+    var destino = document.getElementById(a.getAttribute('href').slice(1));
+    if (!destino) return;
+    e.preventDefault();
+    destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    destino.setAttribute('tabindex', '-1');
+    destino.focus({ preventScroll: true });
+  });
+})();
+
+(function () {
+  var lista = document.getElementById('lista');
+  if (!lista) return;
+  var CLAVE = 'manual-obra-lista';
+  var guardado = {};
+  try { guardado = JSON.parse(localStorage.getItem(CLAVE) || '{}') || {}; } catch (e) { guardado = {}; }
+
+  lista.querySelectorAll('input[type=checkbox]').forEach(function (c) {
+    if (guardado[c.dataset.k]) c.checked = true;
+    c.addEventListener('change', function () {
+      guardado[c.dataset.k] = c.checked;
+      try { localStorage.setItem(CLAVE, JSON.stringify(guardado)); } catch (e) {}
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

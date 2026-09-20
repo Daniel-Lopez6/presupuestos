@@ -348,7 +348,8 @@
           'Añádelas del banco de precios o escríbelas a mano.</p></div>') +
         '<div class="linea-sep"></div>' +
         '<div class="fila-campos fc-3">' +
-          UI.campo({ etiqueta: 'Descuento global (%)', tipo: 'number', nombre: 'descuentoGlobal', valor: p.descuentoGlobal, paso: '0.01', min: 0 }) +
+          UI.campo({ etiqueta: 'Descuento global (%)', tipo: 'number', nombre: 'descuentoGlobal', valor: p.descuentoGlobal, paso: '0.01', min: 0,
+                     attrs: ' max="100"' }) +
           UI.campo({ etiqueta: 'IVA', tipo: 'select', nombre: 'ivaPct', valor: p.ivaPct,
                      opciones: Base.TIPOS_IVA.map(function (t) { return { valor: t.valor, nombre: t.nombre }; }),
                      ayuda: 'El 10 % pide tres cosas a la vez: que el cliente sea un particular o una ' +
@@ -457,7 +458,10 @@
       else if (n === 'fecha') p.fecha = c.value;
       else if (n === 'validezDias') p.validezDias = U.num(c.value);
       else if (n === 'objeto') p.objeto = c.value;
-      else if (n === 'descuentoGlobal') { p.descuentoGlobal = U.num(c.value); refrescaResumen(); }
+      else if (n === 'descuentoGlobal') {
+        p.descuentoGlobal = Math.min(100, Math.max(0, U.num(c.value)));
+        refrescaResumen();
+      }
       else if (n === 'notas') p.notas = c.value;
       else if (n === 'condiciones') p.condiciones = c.value.split('\n');
       else if (n.indexOf('cli_') === 0) {

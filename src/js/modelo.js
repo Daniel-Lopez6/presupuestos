@@ -138,7 +138,9 @@
     (p.lineas || []).forEach(function (l) { subtotal += importeLinea(l); });
     subtotal = U.r2(subtotal);
 
-    var descGlobalPct = U.num(p.descuentoGlobal);
+    // Acotado entre 0 y 100: un descuento del 200 % daría un total mayor que
+    // el subtotal, que no significa nada.
+    var descGlobalPct = Math.min(100, Math.max(0, U.num(p.descuentoGlobal)));
     var descGlobal = U.r2(subtotal * descGlobalPct / 100);
     var base = U.r2(subtotal - descGlobal);
 

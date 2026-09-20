@@ -1,11 +1,11 @@
 /* Service worker: guarda la aplicación para poder abrirla sin conexión. */
-var CACHE = 'presupuestos-v3';
+var CACHE = 'presupuestos-v4';
 var ARCHIVOS = [
-  './', './index.html', './manifest.webmanifest',
+  './', './index.html', './guia.html', './manifest.webmanifest',
   './css/app.css', './css/documento.css',
   './js/config.js', './js/util.js', './js/store.js', './js/datos-base.js', './js/modelo.js',
   './js/ui.js', './js/documento.js', './js/fusion.js', './js/sync.js', './js/app.js',
-  './js/bienvenida.js',
+  './js/bienvenida.js', './js/guia.js', './js/demo.js',
   './js/vista-panel.js', './js/vista-presupuestos.js', './js/vista-clientes.js',
   './js/vista-precios.js', './js/vista-gastos.js', './js/vista-fiscal.js', './js/vista-ajustes.js',
   './assets/icono.svg', './assets/icono-192.png', './assets/icono-512.png'

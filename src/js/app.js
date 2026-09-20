@@ -26,7 +26,7 @@
     { id: 'ajustes',      nombre: 'Ajustes',      icono: 'ajustes' }
   ];
 
-  var MENU_MOVIL = ['panel', 'presupuestos', 'clientes', 'gastos', 'fiscal'];
+  var MENU_MOVIL = ['panel', 'presupuestos', 'clientes', 'gastos', 'fiscal', 'ajustes'];
 
   /* --- Estado ------------------------------------------------------------ */
 
@@ -266,6 +266,8 @@
       '<div class="principal">' +
         '<header class="cabecera">' +
           '<div><h1 id="titulo-vista"></h1><div class="cabecera-sub" id="sub-vista"></div></div>' +
+          '<button class="btn btn-icono btn-ayuda" data-guia title="Guía de uso" ' +
+            'aria-label="Guía de uso" aria-pressed="false">' + UI.ic('info', 17) + '</button>' +
           '<div class="cabecera-acciones" id="acciones-vista"></div>' +
         '</header>' +
         '<main class="contenido" id="contenido"></main>' +
@@ -275,6 +277,8 @@
     app.addEventListener('click', function (e) {
       var b = e.target.closest('[data-vista]');
       if (b) App.ir(b.dataset.vista);
+      var g = e.target.closest('[data-guia]');
+      if (g && global.Guia) global.Guia.alternar();
     });
   }
 

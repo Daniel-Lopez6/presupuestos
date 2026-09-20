@@ -56,6 +56,12 @@ html = html.replace(
 const fecha = new Date().toISOString().slice(0, 10);
 html = html.replace('<head>', `<head>\n<!-- Presupuestos · archivo único generado el ${fecha} -->`);
 
+/* --- Incrustar manual de uso para la versión monolítica --- */
+try {
+  const guiaHtml = leer('guia.html');
+  html = html.replace('</body>', `<script>\nwindow.GUIA_HTML = ${JSON.stringify(guiaHtml)};\n</script>\n</body>`);
+} catch (e) {}
+
 mkdirSync(dist, { recursive: true });
 writeFileSync(join(dist, 'Presupuestos.html'), html, 'utf8');
 
