@@ -182,11 +182,6 @@
         '<div class="flex" style="gap:8px;flex-wrap:wrap">' +
           (global.Guia ? '<button class="btn" data-guia>' + UI.ic('info', 15) +
             '<span>Guía de uso</span></button>' : '') +
-          '<button class="btn" id="aj-asistente">' + UI.ic('bombilla', 15) +
-            '<span>Repetir la puesta en marcha</span></button>' +
-          (global.Demo ? '<button class="btn" id="aj-demo">' + UI.ic('bombilla', 15) +
-            '<span>' + (hayDemo() ? 'Quitar los datos de ejemplo' : 'Cargar datos de ejemplo') +
-            '</span></button>' : '') +
           (global.Bienvenida && global.Bienvenida.sePuedeInstalar()
             ? '<button class="btn" id="aj-instalar">' + UI.ic('descarga', 15) +
               '<span>Instalar en este dispositivo</span></button>' : '') +
@@ -365,13 +360,6 @@
       });
     });
 
-    boton('aj-demo', cargaOQuitaDemo);
-
-    boton('aj-asistente', function () {
-      if (!global.Bienvenida) return;
-      App.estado.ajustes.bienvenidaVista = false;
-      global.Bienvenida.abrir(function () { App.refrescar(); });
-    });
 
     boton('aj-instalar', function () {
       if (!global.Bienvenida) return;
