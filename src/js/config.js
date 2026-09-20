@@ -10,5 +10,5 @@
    Los pasos exactos están en el README, apartado "Sincronización".
    ========================================================================= */
 window.CONFIG = {
-  clienteGoogle: ''
+  clienteGoogle: '177460813111-0i2hq926hiasd9m6hv3he3efh1b327nj.apps.googleusercontent.com'
 };
